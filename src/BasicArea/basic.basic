@@ -1,0 +1,69 @@
+###
+FizzBuzz$
+
+FOR% DS$FISHERMAN
+FOR num = 1 TO 100
+    divisibleBy3 = (num / 3) * 3 = num
+    divisibleBy5 = (num / 5) * 5 = num
+    IF divisibleBy3 THEN GOTO CheckDiv5
+    IF divisibleBy5 THEN PRINT "Buzz": GOTO NextNum
+    PRINT num
+    Gosub NextNum
+
+CheckDiv5:
+    IF divisibleBy5 THEN PRINT "FizzBuzz": GOTO NextNum
+    PRINT "Fizz"
+
+NextNum:
+Next num
+
+
+ The Collatz Conjecture – ask the user for a number greater than 1. Find the number of steps it takes to reach 1 by the following rules: if the number is even, divide it by 2. If it is odd, multiply it by 3, then add 1. Print the number of steps.
+
+10 INPUT "Enter a number greater than 1: ", N
+20 IF N <= 1 THEN PRINT "Number must be greater than 1.": GOTO 10
+30 STEPS = 0
+GOTO Collatz
+
+Collatz:
+40 IF N = 1 THEN GOTO PrintSteps
+50 REM Check if N is even
+60 IF N / 2 * 2 = N THEN N = N / 2: GOTO IncreaseSteps
+70 REM If N is odd
+80 N = N * 3 + 1
+
+IncreaseSteps:
+90 STEPS = STEPS + 1
+100 GOTO CollatzSequence
+
+PrintSteps:
+110 PRINT "It took "; STEPS; " steps to reach 1."
+120 END
+
+
+
+
+
+
+
+###Class average – create DATA for a small class of 5 students – the first element is the students name, the rest of the DATA is a list of grades. For each student, print their average.
+
+
+
+Student = 0
+DataArray:
+IF student = 0 THEN DATA "Shaggy", 80, 90, 85,100
+IF student = 1 THEN DATA DATA "Fred", 75, 95, 88,30
+IF student = 2 THEN DATA DATA "Ben", 92, 88, 91,66
+IF student = 3 THEN DATA DATA "timmy", 85, 84, 86,44
+IF student = 4 THEN DATADATA "Bob", 78, 82, 79, 53
+
+avg:
+ avg = (grade0, grade1, grade2, grade3) / 4
+
+
+for student = 0 TO 5
+	GOSUB DataArray
+	READ name$, grade0, grade1, grade2, grade3
+	PRINT PRINT name$, "'s, Average:", avg
+	NEXT student
