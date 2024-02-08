@@ -20,20 +20,20 @@ public class Lexer {
 
 
     public void populateMap(){
-        tokenMap.put("Print", Token.TokenType.PRINT);
-        tokenMap.put("Read", Token.TokenType.READ);
-        tokenMap.put("Data", Token.TokenType.DATA);
-        tokenMap.put("Gosub", Token.TokenType.GOSUB);
-        tokenMap.put("For", Token.TokenType.FOR);
-        tokenMap.put("To", Token.TokenType.TO);
-        tokenMap.put("Step", Token.TokenType.STEP);
-        tokenMap.put("Next", Token.TokenType.NEXT);
-        tokenMap.put("Return", Token.TokenType.RETURN);
-        tokenMap.put("If", Token.TokenType.IF);
-        tokenMap.put("Then", Token.TokenType.THEN);
-        tokenMap.put("Function", Token.TokenType.Function);
-        tokenMap.put("While", Token.TokenType.While);
-        tokenMap.put("End", Token.TokenType.END);
+        tokenMap.put("print", Token.TokenType.PRINT);
+        tokenMap.put("read", Token.TokenType.READ);
+        tokenMap.put("data", Token.TokenType.DATA);
+        tokenMap.put("gosub", Token.TokenType.GOSUB);
+        tokenMap.put("for", Token.TokenType.FOR);
+        tokenMap.put("to", Token.TokenType.TO);
+        tokenMap.put("step", Token.TokenType.STEP);
+        tokenMap.put("next", Token.TokenType.NEXT);
+        tokenMap.put("return", Token.TokenType.RETURN);
+        tokenMap.put("if", Token.TokenType.IF);
+        tokenMap.put("then", Token.TokenType.THEN);
+        tokenMap.put("function", Token.TokenType.Function);
+        tokenMap.put("while", Token.TokenType.While);
+        tokenMap.put("end", Token.TokenType.END);
     }
 
     /**
@@ -76,10 +76,14 @@ public class Lexer {
                 }
                 if(handler.peek(0) == '\n') {
                     lineNumber++;}
-
             }
+            else if (nextChar == '"') {
+            // Handle string literals enclosed in double quotes
+            //processSymbol();
+            HandleStringLiteral();
+        }
 
-            // Move to the next character in the input string
+        // Move to the next character in the input string
             handler.swallow(1);
         }
 
@@ -137,6 +141,30 @@ public class Lexer {
     }
 
 
+    public void HandleStringLiteral(){
+        int pos = 0;
+        StringBuilder string = new StringBuilder();
+        string.append(handler.getChar());
+        while (handler.peek(0) != '"'){
+
+            if (handler.peek(0) == '\\'){
+
+                for (int i = 0; handler.peek() != '"'; i++){
+
+                }
+                string.append(handler.getChar());
+                pos++;
+            }
+
+
+            string.append(handler.getChar());
+            pos++;
+        }
+        string.append(handler.getChar());
+        charPos = charPos + pos;
+        token.add(new Token(Token.TokenType.StringLiteral, lineNumber, charPos, string.toString()));
+        handler.swallow(1);
+    }
 
 
 

@@ -52,10 +52,10 @@ PrintSteps:
 
 Student = 0
 DataArray:
-IF student = 0 THEN DATA "Shaggy", 80, 90, 85,100
-IF student = 1 THEN DATA DATA "Fred", 75, 95, 88,30
-IF student = 2 THEN DATA DATA "Ben", 92, 88, 91,66
-IF student = 3 THEN DATA DATA "timmy", 85, 84, 86,44
+IF student = 0 THEN Data "Shaggy", 80, 90, 85,100
+IF student = 1 THEN Data DATA "Fred", 75, 95, 88,30
+IF student = 2 THEN Data DATA "Ben", 92, 88, 91,66
+IF student = 3 THEN data DATA "timmy", 85, 84, 86,44
 IF student = 4 THEN DATADATA "Bob", 78, 82, 79, 53
 
 avg:

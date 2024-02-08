@@ -23,6 +23,7 @@ public class Token {
         Function,
         While,
         END,
+        StringLiteral
 
     }
 
