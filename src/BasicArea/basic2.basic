@@ -1,37 +1,9 @@
 # define a list of numbers using data
 data 5, 10, 15, 20
 
-date = "She said Soda Water    "
+date = "She said Soda Water \"Hello"\ "
 
-# use read to load these numbers into variables
-for i = 1 to 4
-    read num
-    print "Data number "; i; ": "; num
-next i
-
-# ask the user for a number and store it
-input "Enter a number to calculate its factorial: "; usernum
-
-# call a subroutine to calculate the factorial
-gosub calculatefactorial
-
-# use for loop to print even numbers between 1 and 10
-print "Even numbers between 1 and 10:"
-for num = 1 to 10 step 1
-    if num mod 2 = 0 then print num
-next num
-
-# check if user number is positive
-if usernum > 0 then print "Your number is positive."
-
-# while loop example: Count down from 5
-count = 5
-while count > 0
-    print "Countdown: "; count
-    count = count - 1
-wend
-
-end
+ date% <> date
 
 calculatefactorial:
     factorial = 1
