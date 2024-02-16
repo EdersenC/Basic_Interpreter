@@ -99,7 +99,6 @@ public class Lexer {
 
         while (!handler.isDone()) { // Continue processing until the input is exhausted
             char nextChar = handler.peek(0); // Peek at the next character
-
             if (nextChar == '\t' || nextChar == ' ') {
                 // Ignore spaces and tabs
             } else if (nextChar == '\n') {
@@ -113,12 +112,10 @@ public class Lexer {
             } else if (Character.isLetter(nextChar)) {
                 // Process a word token
                 processWord(lineNumber);
-                //System.out.print(processWord(lineNumber) + "\n");
             } else if (Character.isDigit(nextChar)) {
                 try {
                     // Process a number token
                     processNumber(lineNumber);
-                    //System.out.print(processNumber(lineNumber) + "\n");
                 } catch (IllegalArgumentException ex) {
                     // Handle the exception or rethrow it if necessary
                     throw new IllegalArgumentException("Error processing number token at line " + handler.getIndex(), ex);
@@ -145,10 +142,6 @@ public class Lexer {
         // Move to the next character in the input string
             handler.swallow(1);
         }
-
-
-
-
     //System.out.println(token);
     return token;
 
@@ -164,31 +157,29 @@ public class Lexer {
      */
     public void processWord(int lineNumber){
         int pos = 0;
+        Boolean end = false;
         StringBuilder word = new StringBuilder();
         while (Character.isLetter(handler.peek(0))) {
             word.append(handler.getChar());
             pos++;
             Boolean isLabel = handler.peek(0)==':';
-            Boolean dollarMod = handler.peek(0)=='$'|| handler.peek(0)=='%'
+            Boolean endsWith = handler.peek(0)=='$'|| handler.peek(0)=='%'
                     || isLabel;
-
-            Boolean carriageReturn = (handler.peek(1)=='\r'|| handler.peek(1)=='\n');
-            if (dollarMod && (handler.peek(1)==' '||carriageReturn)){
+            Boolean lineFeed = (handler.peek(1)=='\r'|| handler.peek(1)=='\n');
+            if (endsWith && (handler.peek(1)==' '||lineFeed)){ // if the next character is a space or a carriage return
                 if (isLabel){
-                    token.add(new Token(Token.TokenType.LABEL, lineNumber, charPos, word.toString()));
-                    handler.swallow(1);
+                    token.add(new Token(Token.TokenType.LABEL, word.toString(), lineNumber, charPos));
+                    //handler.swallow(1);
                     charPos++;
+                    end = true;
                 }
                 word.append(handler.getChar());
                 pos++;
             }
         }
         charPos = charPos + pos;
-
-        if (tokenMap.containsKey(word.toString())){
-            token.add(new Token(tokenMap.get(word.toString()), lineNumber, charPos, word.toString()));
-        } else {
-            token.add(new Token(Token.TokenType.WORD, lineNumber, charPos, word.toString()));
+        if (!end) {
+            token.add(new Token(Token.TokenType.WORD, word.toString(), lineNumber, charPos));
         }
     }
 
@@ -204,54 +195,79 @@ public class Lexer {
             pos++;
         }
         charPos = charPos + pos;
-        token.add(new Token(Token.TokenType.NUMBER, lineNumber, charPos, number.toString()));
+        token.add(new Token(Token.TokenType.NUMBER,number.toString(), lineNumber, charPos));
     }
 
 
+    /**
+     * This method is used to process a string literal token
+     */
     public void HandleStringLiteral(){
         int pos = 0;
-        Boolean escape = false;
+        Boolean escaped = false;
         StringBuilder string = new StringBuilder();
         string.append(handler.getChar());
-        while (handler.peek(0) != '"'){
+        while (!escaped){
             if (handler.peek(0) == '\\'){
-                handler.swallow(1);
+                handler.swallow(1); // swllow the escape character
+
                 while (handler.peek(0) != '\\'){
                     string.append(handler.getChar());
-                    pos++;
                 }
                 handler.swallow(1);
+                string.append(handler.getChar());
+            }
 
+            else if (handler.peek(0) == '"'){
+                escaped = true;
             }
             string.append(handler.getChar());
             pos++;
         }
-        string.append(handler.getChar());
         charPos = charPos + pos;
-        token.add(new Token(Token.TokenType.StringLiteral, lineNumber, charPos, string.toString()));
-        handler.swallow(1);
+        token.add(new Token(Token.TokenType.StringLiteral, string.toString(), lineNumber, charPos));
+
     }
 
 
+    /**
+     * This method is used to compare the maps and add the token to the list
+     * @param map   the map to compare
+     * @param token the token list
+     * @param value the value to compare
+     * @throws NoSuchElementException
+     */
+    public void compareMaps(HashMap<String, Token.TokenType> map,
+                            LinkedList<Token> token,
+                            String value) throws NoSuchElementException{
+        for(Map.Entry<String, Token.TokenType> entry : map.entrySet()){
+            if (entry.getKey().contentEquals(value)){
+                token.add(new Token(entry.getValue(),value, lineNumber, charPos));
+            }
+        }
+    }
 
+
+    /**
+     * This method is used to process a symbol token
+     */
     public void processSymbol(){
         int pos = 0;
         StringBuilder symbol = new StringBuilder();
-        while (handler.peek(0) != ' '){
-            symbol.append(handler.getChar());
-            pos++;
+        while (handler.peek(0) != ' '
+                && handler.peek(0) != '\r'
+                && handler.peek(0) != '\n'
+                && !(Character.isLetterOrDigit(handler.peek(0))))
+        {
+                symbol.append(handler.getChar());
+                pos++;
         }
         charPos = charPos + pos;
-        if (oneCharacter.containsKey(symbol.toString())){
-            token.add(new Token(oneCharacter.get(symbol.toString()), lineNumber, charPos, symbol.toString()));
-        } else if (twoCharacter.containsKey(symbol.toString())){
-            token.add(new Token(twoCharacter.get(symbol.toString()), lineNumber, charPos, symbol.toString()));
-        } else
-            token.add(new Token(operators.getOrDefault(symbol.toString(), Token.TokenType.WORD), lineNumber, charPos, symbol.toString()));
+        if (!oneCharacter.containsKey(symbol.toString()) && !twoCharacter.containsKey(symbol.toString())){
+            throw new NoSuchElementException("No such element %s".formatted(symbol.toString()));
+        }
+        compareMaps(operators, token ,symbol.toString());
     }
-
-
-
 
 
 

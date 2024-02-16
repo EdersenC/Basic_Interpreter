@@ -69,7 +69,7 @@ public class Token {
     }
 
 
-    public Token(TokenType token, int lineNumber, int position, String value) {
+    public Token(TokenType token, String value, int lineNumber, int position) {
         this.token = token;
         this.lineNumber = lineNumber;
         this.position = position;

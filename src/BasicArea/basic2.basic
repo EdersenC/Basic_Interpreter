@@ -1,14 +1,5 @@
-# define a list of numbers using data
-data 5, 10, 15, 20
+MyPizza: 3 <> 4   3 <= 3 <> 44 +  -  * / ( )
 
-date = "She said Soda Water \"Hello"\ "
+ myLabel: Fax = 9.4  story = " She said \"Wonk Wonk\"  water "
 
- date% <> date
-
-calculatefactorial:
-    factorial = 1
-    for i = 1 to usernum
-        factorial = factorial * i
-    next i
-    print "Factorial of "; usernum; " is "; factorial
-    return
+soda <> " 5 hello  5.32 8.5 4  44"

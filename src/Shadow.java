@@ -1,4 +1,4 @@
-public class Logger {
+public class Shadow {
 
 
     public static void log(String message, Object... args){
