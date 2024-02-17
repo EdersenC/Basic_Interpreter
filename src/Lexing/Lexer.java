@@ -134,21 +134,28 @@ public class Lexer {
                     handler.swallow(1);
                 }
                 if(handler.peek(0) == '\n') {
-                    lineNumber++;}
+                    lineNumber++;
+                    token.add(new Token(Token.TokenType.ENDOFLINE, lineNumber, charPos));
+                }
             }
-            else if (nextChar == '"') {
+            else if (nextChar == '"'){
             // Handle string literals enclosed in double quotes
             //processSymbol();
-            HandleStringLiteral();
+            handleStringLiteral();
         }
-            else {
+
+            StringBuilder symbol = new StringBuilder();
+            symbol.append(nextChar);
+
+
                 // Process a symbol token
                 processSymbol();
-                //System.out.print(processSymbol() + "\n");
-            }
 
+                //System.out.print(processSymbol() + "\n");
         // Move to the next character in the input string
-            handler.swallow(1);
+
+        handler.swallow(1);
+
         }
     //System.out.println(token);
     return token;
@@ -170,12 +177,14 @@ public class Lexer {
         while ( handler.peek(0) != ' '
                 && handler.peek(0) != '\r'
                 && handler.peek(0) != '\n'
-                && (Character.isLetterOrDigit(handler.peek(0)) || handler.peek(0) == '_' || handler.peek(0) == ':')){
+                && (Character.isLetterOrDigit(handler.peek(0)) || handler.peek(0) == '_'
+                || handler.peek(0) == ':')
+                || handler.peek(0) == '$' || handler.peek(0) == '%'){
             word.append(handler.getChar());
             pos++;
             Boolean isLabel = handler.peek(0)==':';
-            Boolean endsWith = handler.peek(0)=='$'|| handler.peek(0)=='%'
-                    || isLabel;
+            Boolean endsWith = (handler.peek(0)=='$'|| handler.peek(0)=='%'
+                    || isLabel) && (!Character.isLetterOrDigit(handler.peek(1)));
             Boolean lineFeed = (handler.peek(1)=='\r'|| handler.peek(1)=='\n');
             if (endsWith && (handler.peek(1)==' '||lineFeed)){ // if the next character is a space or a carriage return
                 if (isLabel){
@@ -188,6 +197,8 @@ public class Lexer {
                 pos++;
             }
         }
+
+
         charPos = charPos + pos;
         if (!end) {
             token.add(new Token(Token.TokenType.WORD, word.toString(), lineNumber, charPos));
@@ -200,8 +211,15 @@ public class Lexer {
      */
     public void processNumber(int lineNumber){
         int pos = 0;
+        boolean toManyDecimals = false;
         StringBuilder number = new StringBuilder();
         while (Character.isDigit(handler.peek(0))|| handler.peek(0) == '.'){
+            if (handler.peek(0) == '.'){
+                if (toManyDecimals){
+                    throw new IllegalArgumentException("Too many decimals at line %d".formatted(lineNumber));
+                }
+                toManyDecimals = true;
+            }
             number.append(handler.getChar());
             pos++;
         }
@@ -213,9 +231,9 @@ public class Lexer {
     /**
      * This method is used to process a string literal token
      */
-    public void HandleStringLiteral(){
+    public void handleStringLiteral(){
         int pos = 0;
-        Boolean escaped = false;
+        boolean escaped = false;
         StringBuilder string = new StringBuilder();
         string.append(handler.getChar());
         while (!escaped){
@@ -232,8 +250,10 @@ public class Lexer {
             else if (handler.peek(0) == '"'){
                 escaped = true;
             }
-            string.append(handler.getChar());
-            pos++;
+            if (!escaped) {
+                string.append(handler.getChar());
+                pos++;
+            }
         }
         charPos = charPos + pos;
         token.add(new Token(Token.TokenType.StringLiteral, string.toString(), lineNumber, charPos));
@@ -266,17 +286,20 @@ public class Lexer {
         int pos = 0;
         StringBuilder symbol = new StringBuilder();
         while (handler.peek(0) != ' '
+                && handler.peek(0) != '"'
                 && handler.peek(0) != '\r'
                 && handler.peek(0) != '\n'
-                && !(Character.isLetterOrDigit(handler.peek(0))))
+                && handler.peek(0) != '\u0000'
+                && !(Character.isLetterOrDigit(handler.peek(0)))
+        )
+
         {
-                symbol.append(handler.getChar());
-                pos++;
+            symbol.append(handler.getChar());
+            pos++;
+
         }
         charPos = charPos + pos;
-        if (!oneCharacter.containsKey(symbol.toString()) && !twoCharacter.containsKey(symbol.toString())){
-            throw new NoSuchElementException("No such element %s".formatted(symbol.toString()));
-        }
+
         compareMaps(operators, token ,symbol.toString());
     }
 

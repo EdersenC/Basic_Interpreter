@@ -27,9 +27,10 @@ public class Junit {
 
         try {
             //String content = new String(Files.readAllBytes(basicFilePath));
-            String content = "FizzBuzz$\n 33 food@ \n soda is great";
+            String content = "FOR% \n DS$FISHERMAN = (\" \\\"She said Wonk Wonk\\\" \")\n";
             LinkedList<Token> tokens = runLex(null, content);
             System.out.println("DONE LEXING");
+
 
 
 
@@ -202,7 +203,7 @@ public LinkedList<Token> runLex(Path filePath,String testMessage){
 
         // Test isDone function
         assertFalse(codeHandler.isDone());
-        codeHandler.swallow(content.length() - swallowAmount - 1); // Move index to the end
+        codeHandler.swallow(content.length()-1 ); // Move index to the end
         assertTrue("isDone should return true at end", codeHandler.isDone());
 
         // Reset for remainder test
