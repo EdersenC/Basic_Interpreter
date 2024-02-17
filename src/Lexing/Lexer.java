@@ -1,4 +1,5 @@
 package Lexing;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.HashMap;
 public class Lexer {
@@ -13,8 +14,15 @@ public class Lexer {
     HashMap<String, Token.TokenType> oneCharacter = new HashMap<String, Token.TokenType>();
     HashMap<String, Token.TokenType> twoCharacter = new HashMap<String, Token.TokenType>();
     HashMap<String, Token.TokenType> operators = new  HashMap<String, Token.TokenType>();
-    public Lexer(String StringHandler,int line, int pos) {
-        handler = new CodeHandler(StringHandler, 0);
+    public Lexer(Path filePath, int line, int pos) {
+        handler = new CodeHandler(filePath, 0);
+        this.lineNumber = line;
+        this.charPos = pos;
+        populateMaps();
+
+    }
+    public Lexer(String filePath, int line, int pos) {
+        handler = new CodeHandler(filePath, 0);
         this.lineNumber = line;
         this.charPos = pos;
         populateMaps();
@@ -92,10 +100,10 @@ public class Lexer {
 
     /**
      * This method is used to process the input string and generate a list of tokens
-     * @param fileName
+     * @param filePath
      * @return token
      */
-    public LinkedList<Token> lex(String fileName){
+    public LinkedList<Token> lex(String filePath){
 
         while (!handler.isDone()) { // Continue processing until the input is exhausted
             char nextChar = handler.peek(0); // Peek at the next character
@@ -159,7 +167,10 @@ public class Lexer {
         int pos = 0;
         Boolean end = false;
         StringBuilder word = new StringBuilder();
-        while (Character.isLetter(handler.peek(0))) {
+        while ( handler.peek(0) != ' '
+                && handler.peek(0) != '\r'
+                && handler.peek(0) != '\n'
+                && (Character.isLetterOrDigit(handler.peek(0)) || handler.peek(0) == '_' || handler.peek(0) == ':')){
             word.append(handler.getChar());
             pos++;
             Boolean isLabel = handler.peek(0)==':';

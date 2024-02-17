@@ -68,7 +68,12 @@ public class Token {
         this.position = position;
     }
 
-
+    /**
+     * @param token the Token Type
+     * @param value the Token Value
+     * @param lineNumber the line number
+     * @param position the position
+     */
     public Token(TokenType token, String value, int lineNumber, int position) {
         this.token = token;
         this.lineNumber = lineNumber;
@@ -78,6 +83,31 @@ public class Token {
 
 
 
+    // getters and setters
+    /**
+     * @return the Token Value
+     */
+    public String getValue() {
+        return value;
+    }
+    /**
+     * @param value the Token Value to set
+     */
+    public void setValue(String value) {
+        this.value = value;
+    }
+    /**
+     * @return the position
+     */
+    public int getLineNumber() {
+        return lineNumber;
+    }
+
+
+
+    /**
+     * @return the Token to a string
+     */
     public String toString() {
         return "\n {Token: " + token + ", Value: " + value + ", Line: " + lineNumber + ", position: " + position + " }";
 

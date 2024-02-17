@@ -46,7 +46,7 @@ PrintSteps:
 
 
 
-###Class average – create DATA for a small class of 5 students – the first element is the students name, the rest of the DATA is a list of grades. For each student, print their average.
+###Class average create DATA for a small class of 5 students the first element is the students name, the rest of the DATA is a list of grades. For each student, print their average.
 
 
 

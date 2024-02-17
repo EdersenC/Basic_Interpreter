@@ -18,16 +18,12 @@ public class Basic {
         String srcDirectoryPath = "src/BasicArea";
         String basicFileName = args[0]; // Use the provided argument for the file name
         Path basicFilePath = Paths.get(srcDirectoryPath, basicFileName);
+
         Shadow.log("Running: %s \nLocation: %s".formatted(basicFileName,basicFilePath));
-        try {
-            String content = new String(Files.readAllBytes(basicFilePath));
             // Assuming Lexer is a class you have defined elsewhere
-            Lexer lexer = new Lexer(content, 0, 0);
+            Lexer lexer = new Lexer(basicFilePath, 0, 0);
             // Assuming this method is correctly defined in Lexer
             LinkedList<Token> tokens =  lexer.lex(basicFileName);
             Shadow.log("Lexed Tokens: %s".formatted(tokens.toString()),"DONE LEXING");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 }
