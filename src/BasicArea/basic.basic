@@ -1,10 +1,11 @@
 ## write basick code here dont captilize builtin names like goto for, if, else, print etc
 
-# this is a comment
+## this is a comment
 print("Hello World")
  MyFucn:
     print("This is my function")
     print("I am learning Basic Programming Language")
-
-    for(i=0; i<10; i++)
+print
+    for(i=0; i<-10; i++)
         print(i)
+    endfor

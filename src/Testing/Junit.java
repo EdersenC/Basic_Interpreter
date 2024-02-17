@@ -27,9 +27,9 @@ public class Junit {
 
         try {
             //String content = new String(Files.readAllBytes(basicFilePath));
-            String content = "FOR% \n DS$FISHERMAN = (\" \\\"She said Wonk Wonk\\\" \")\n";
+            String content = "print(<=5) hi ";
             LinkedList<Token> tokens = runLex(null, content);
-            System.out.println("DONE LEXING");
+
 
 
 
@@ -153,7 +153,7 @@ public class Junit {
 
 public LinkedList<Token> runLex(Path filePath,String testMessage){
     Boolean isFilPath = filePath != null;
-    Lexer lexer = isFilPath ? new Lexer(filePath,0,0) : new Lexer(testMessage,0,0);
+    Lexer lexer = isFilPath ? new Lexer(filePath,1,0) : new Lexer(testMessage,1,0);
     lexer.lex("basic.basic");
     LinkedList<Token> tokens = lexer.lex("basic.basic");
     System.out.println("Contents: %s \n Tokens: %s ".formatted(filePath, tokens.toString()));
