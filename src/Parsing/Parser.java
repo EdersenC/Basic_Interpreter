@@ -1,7 +1,10 @@
 package Parsing;
 
 import Lexing.Token;
+import Parsing.Nodes.MathOpNode;
+import Parsing.Nodes.Node;
 import Parsing.Nodes.ProgramNode;
+import Parsing.Nodes.intergerNode;
 
 import java.util.LinkedList;
 import java.util.Optional;
@@ -11,8 +14,9 @@ public class Parser {
     private TokenManager handler;
     public Parser(LinkedList<Token> tokens){
         handler = new TokenManager(tokens);
-
+        throw new UnsupportedOperationException("Not implemented yet, fortnite dot exe TROLL muhahahaha");
     }
+
 
 
     /**
@@ -32,23 +36,34 @@ public class Parser {
 
     /**
      * @return the expression
+     *  Handles addtion and Subtraction
      */
-    public Optional<Token> expression(){
-        return handler.peek(0);
-    }
+    public Optional<Node> expression() {
+        Optional<Node> left = term();
 
+        return Optional.of(new MathOpNode(new intergerNode(5), new intergerNode(5)));
+    }
     /**
      * @return the term
+     * handles multiplication and division
      */
-    public Optional<Token> term(){
-        return handler.peek(0);
+    public Optional<Node> term(){
+
+        return Optional.of(new MathOpNode(new intergerNode(5), new intergerNode(5)));
     }
 
     /**
      * @return the factor
+     * handles numbers and parenthesis
      */
-    public Optional<Token> factor(){
-        return handler.peek(0);
+    public Optional<Node> factor(){
+
+        //check fdor paeren for nested espressions
+
+
+
+    return Optional.of(new MathOpNode(new intergerNode(5), new intergerNode(5)));
+
     }
 
 
