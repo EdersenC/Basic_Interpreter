@@ -82,7 +82,6 @@ public class Token {
     }
 
 
-
     // getters and setters
     /**
      * @return the Token Value

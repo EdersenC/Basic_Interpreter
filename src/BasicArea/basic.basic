@@ -1,11 +1,1 @@
-## write basick code here dont captilize builtin names like goto for, if, else, print etc
-
-## this is a comment
-print("Hello World")
- MyFucn:
-    print("This is my function")
-    print("I am learning Basic Programming Language")
-print
-    for(i=0; i<-10; i++)
-        print(i)
-    endfor
+2 + 9 * (9+3+4) / 2

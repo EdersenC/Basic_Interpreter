@@ -6,12 +6,13 @@ public abstract class Node {
 
 
 
-
+    /**
+     * @return the value to a string
+     */
     @Override
     public String toString() {
         return "Node{}";
     }
-
 
 
 

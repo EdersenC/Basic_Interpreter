@@ -4,8 +4,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.LinkedList;
-
 import Lexing.*;
+import Parsing.*;
+import Parsing.Nodes.*;
 public class Basic {
     public static void main(String[] args) {
         // Check if the number of arguments is not exactly one
@@ -24,6 +25,9 @@ public class Basic {
             Lexer lexer = new Lexer(basicFilePath, 0, 0);
             // Assuming this method is correctly defined in Lexer
             LinkedList<Token> tokens =  lexer.lex(basicFileName);
-            Shadow.log("Lexed Tokens: %s".formatted(tokens.toString()),"DONE LEXING");
+            Shadow.log("\nLexed Tokens: %s".formatted(tokens.toString()),"DONE LEXING");
+            Parser parser = new Parser(tokens);
+            ProgramNode programNode = parser.parse();
+            Shadow.log("\nParsed Program: %s".formatted(programNode.toString()));
     }
 }

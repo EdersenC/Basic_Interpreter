@@ -1,6 +1,6 @@
 package Parsing.Nodes;
 
-public class FloatNode {
+public class FloatNode extends Node {
 
 
 

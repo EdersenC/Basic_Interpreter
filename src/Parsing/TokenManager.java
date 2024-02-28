@@ -5,12 +5,17 @@ import Lexing.Token;
 import java.util.LinkedList;
 import java.util.Optional;
 
+/**
+ * TokenManager
+ * The TokenManager class is responsible for
+ * managing the list of tokens and providing
+ * methods to traverse and manipulate the list.
+ */
 public class TokenManager {
 
 
 
     private LinkedList<Token> tokens;
-
 
 
     public TokenManager(LinkedList<Token> tokens){

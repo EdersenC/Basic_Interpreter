@@ -3,13 +3,13 @@ package Parsing.Nodes;
 /**
  * This class is used to represent an integer node
  */
-public class intergerNode extends Node{
+public class IntergerNode extends Node{
 
 
     private int value;
 
 
-    public intergerNode(int value){
+    public IntergerNode(int value){
         this.value = value;
     }
 

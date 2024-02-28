@@ -9,17 +9,17 @@ import java.util.Optional;
 public class MathOpNode extends Node{
 
 
-    private enum MathOp{
+    public enum MathOp{
         ADD,
-        SUB,
-        MUL,
-        DIV,
+        SUBTRACT,
+        MULTIPLY,
+        DIVIDE,
 
     }
 
 
     private Node left;
-    private Node op;
+    private MathOp op;
     private Node right;
 
 
@@ -28,7 +28,7 @@ public class MathOpNode extends Node{
      * @param op node
      * @param right node
      */
-    public MathOpNode(Node left, Node op, Node right){
+    public MathOpNode(Node left, MathOp op, Node right){
         this.left = left;
         this.op = op;
         this.right = right;
@@ -53,15 +53,16 @@ public class MathOpNode extends Node{
     /**
      * @return the operation Node
      */
-    public Optional<Node> getOp(){
+    public Optional<MathOp> getOp(){
         return Optional.of(op);
     }
     /**
      * @return the right Node
      */
-    public Optional<Node> Right(){
+    public Optional<Node> getRight(){
         return Optional.of(right);
     }
+
 
     /**
      * @return the MathOpNode to a string
