@@ -39,6 +39,22 @@ public class Parser {
         return new ProgramNode(nodes);
     }
 
+
+    public Optional<StatementNode> statements(){
+        return Optional.empty();
+    }
+
+
+
+    public Node statement(){
+       return null;
+    }
+
+
+
+
+
+
     /**
      * Parses expressions, handling binary operations such as addition and subtraction.
      * It builds upon the lower-level term() method to construct the expression hierarchy.
@@ -92,11 +108,10 @@ public class Parser {
         Optional<Token> number = handler.matchAndRemove(Token.TokenType.NUMBER);
         // If the token is a number, it is either an integer or a float.
         if(number.isPresent()){
-            try {
-                return Optional.of(new IntergerNode(stringToInt(number.get().getValue())));
-            } catch (NumberFormatException e){
-                return Optional.of(new FloatNode(stringToFloat(number.get().getValue())));
-            }
+            return intOrFloat(number);
+        }
+        if (handler.matchAndRemove(Token.TokenType.WORD).isPresent()){
+            return Optional.of(new VariableNode(number.get().getValue()));
         }
         if (handler.matchAndRemove(Token.TokenType.LEFT_PAREN).isPresent()){
             Optional<Node> expression = expression();
@@ -110,17 +125,18 @@ public class Parser {
     }
 
     /**
-     * Converts a string representation of an integer into its integer value.
-     * @param value The string to convert.
-     * @return The integer value of the string.
+     * Converts a token representing a number into an integer or float node.
+     * @param number The token to convert.
+     * @return Optional containing the Node representing the number, if parsed successfully.
      */
-    private int stringToInt(String value){
-        return Integer.parseInt(value);
+    private Optional<Node> intOrFloat(Optional<Token> number) {
+        try {
+            return Optional.of(new IntergerNode(Integer.parseInt(number.get().getValue())));
+        } catch (NumberFormatException e){
+            return Optional.of(new FloatNode(Float.parseFloat(number.get().getValue())));
+        }
     }
 
-    private float stringToFloat(String value){
-        return Float.parseFloat(value);
-    }
 
 }
 
