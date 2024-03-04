@@ -30,9 +30,9 @@ public class Parser {
     public ProgramNode parse(){
         LinkedList<Node> nodes = new LinkedList<>();
         while (handler.moreTokens()){
-            Optional<Node> expression = expression();
-            if(expression.isPresent()){
-                nodes.add(expression.get());
+            Optional<StatementNode> statement = statements();
+            if(statement.isPresent()){
+                nodes.add(statement.get());
                 handler.acceptSeparator(); // Skips token separators like semicolons, if present.
             }
         }
@@ -41,12 +41,32 @@ public class Parser {
 
 
     public Optional<StatementNode> statements(){
+        StatementNode statement = statement();
+        while (statement() != null){
+
+
+        }
+
+
+
+
         return Optional.empty();
     }
 
 
 
-    public Node statement(){
+        public StatementNode statement(){
+        Optional<Token> assign = handler.matchAndRemove(Token.TokenType.WORD);
+        Optional<Token> print = handler.matchAndRemove(Token.TokenType.PRINT);
+        if (assign.isPresent()){
+            handler.acceptSeparator();
+            if(handler.matchAndRemove(Token.TokenType.EQUALS).isPresent()){
+                VariableNode variable = new VariableNode(assign.get().getValue());
+                Optional<Node> expression = expression();
+                return expression.map(node -> new AssignmentNode(variable, node)).orElse(null);
+            }
+        }
+
        return null;
     }
 

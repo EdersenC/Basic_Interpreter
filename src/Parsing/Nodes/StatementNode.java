@@ -20,6 +20,15 @@ public abstract class StatementNode extends Node{
     }
 
 
+
+
+
+    public void addStatement(StatementNode statement){
+        statements.add(statement);
+    }
+
+
+
     /**
      * @return the statements as a string
      */
