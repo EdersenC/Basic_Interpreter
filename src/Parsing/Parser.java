@@ -24,7 +24,7 @@ public class Parser {
 
     /**
      * Parses the list of tokens into an AST.
-     * This method sequentially processes expressions to build the program structure.
+     * This method sequentially processes expressions And Statements to build the program structure.
      * @return ProgramNode representing the root of the AST.
      */
     public ProgramNode parse(){
@@ -37,6 +37,10 @@ public class Parser {
     }
 
 
+    /**
+     * Parses a list of statements, handling both assignments and print statements.
+     * @return StatementsNode representing the parsed list of statements.
+     */
     public StatementsNode statements(){
         StatementsNode statements = new StatementsNode();
         StatementNode statement = statement();
@@ -48,8 +52,11 @@ public class Parser {
         return  statements;
     }
 
-
-        public StatementNode statement(){
+    /**
+     * Parses a statement, handling both assignments and print statements.
+     * @return StatementNode representing the parsed statement.Eiter an assignment or a print statement.
+     */
+    public StatementNode statement(){
         Optional<Token> assign = handler.matchAndRemove(Token.TokenType.WORD);
         if (assign.isPresent()){
             handler.acceptSeparator();
@@ -69,6 +76,10 @@ public class Parser {
     }
 
 
+    /**
+     * Parses a print statement, handling the list of printable expressions.
+     * @return PrintNode representing the print statement.
+     */
     public PrintNode printList(){
         LinkedList<Node> nodes = new LinkedList<Node>();
         do {
@@ -86,8 +97,12 @@ public class Parser {
     }
 
 
-
-    public Token printAble(){
+    // this functions checks what tokens types are printable
+    /**
+     * Parses a printable expression, handling both string literals and variables.
+     * @return Token representing the printable expression.
+     */
+    private Token printAble(){
         Optional<Token> word = handler.matchAndRemove(Token.TokenType.WORD);
 
         if(word.isPresent()){

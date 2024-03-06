@@ -22,7 +22,7 @@ public class ParserJunit {
 
     @Test
     public void TestParser1() {
-        String content = " 2.3 - 9 * (9+3+4) / 2 "  ;
+        String content = " Test1 = 2.3 - 9 * (9+3+4) / 2 "  ;
         String srcDirectoryPath = "src/BasicArea";
         String basicFileName = "basic.basic";
         Path basicFilePath = Paths.get(srcDirectoryPath, basicFileName);
@@ -31,14 +31,16 @@ public class ParserJunit {
         ProgramNode programNode = parser.parse();
         System.out.println(programNode.toString());
 
-        MathOpNode mathOpNode = (MathOpNode) programNode.getNodes().get(0).get();
 
-        assertEquals("ProgramNode{nodes=[MathOpNode{left=FloatNode{value=2.3}, " +
-                        "op=SUBTRACT, right=MathOpNode{left=MathOpNode{left=IntegerNode{value=9}, " +
+
+        assertEquals("ProgramNode{nodes=[Optional[StatementsNode{" +
+                        "statements=[" +
+                        "AssignmentNode{variable=VariableNode{name=Test1, value=null}, " +
+                        "value=MathOpNode{left=FloatNode{value=2.3}, op=SUBTRACT, " +
+                        "right=MathOpNode{left=MathOpNode{left=IntegerNode{value=9}, " +
                         "op=MULTIPLY, right=MathOpNode{left=MathOpNode{left=IntegerNode{value=9}, " +
                         "op=ADD, right=IntegerNode{value=3}}, " +
-                        "op=ADD, right=IntegerNode{value=4}}}, " +
-                        "op=DIVIDE, right=IntegerNode{value=2}}}]}"
+                        "op=ADD, right=IntegerNode{value=4}}}, op=DIVIDE, right=IntegerNode{value=2}}}}]}]]}"
                 ,programNode.toString());
 
 
@@ -46,7 +48,7 @@ public class ParserJunit {
 
     @Test
     public void TestParser2() {
-        String content = " ( 29 + 9.4 ) / 2 "  ;
+        String content = " bob = ( 29 + 9.4 ) / 2 "  ;
         String srcDirectoryPath = "src/BasicArea";
         String basicFileName = "basic.basic";
         Path basicFilePath = Paths.get(srcDirectoryPath, basicFileName);
@@ -57,9 +59,11 @@ public class ParserJunit {
 
         //MathOpNode mathOpNode = (MathOpNode) programNode.getNodes().get(0);
 
-        assertEquals("ProgramNode{nodes=[MathOpNode{left=MathOpNode{left=IntegerNode{value=29}, " +
-                        "op=ADD, right=FloatNode{value=9.4}}, " +
-                        "op=DIVIDE, right=IntegerNode{value=2}}]}"
+        assertEquals("ProgramNode{nodes=[Optional[StatementsNode{" +
+                        "statements=[AssignmentNode{" +
+                        "variable=VariableNode{name=bob, value=null}, " +
+                        "value=MathOpNode{left=MathOpNode{left=IntegerNode{value=29}, " +
+                        "op=ADD, right=FloatNode{value=9.4}}, op=DIVIDE, right=IntegerNode{value=2}}}]}]]}"
                 ,programNode.toString());
 
 
@@ -69,7 +73,7 @@ public class ParserJunit {
 
     @Test
     public void TestParser3() {
-        String content = "10.78 * 3 + (99.9 - 67)"  ;
+        String content = " phips = 10.78 * 3 + (99.9 - 67)"  ;
         String srcDirectoryPath = "src/BasicArea";
         String basicFileName = "basic.basic";
         Path basicFilePath = Paths.get(srcDirectoryPath, basicFileName);
@@ -80,10 +84,10 @@ public class ParserJunit {
 
         //MathOpNode mathOpNode = (MathOpNode) programNode.getNodes().get(0);
 
-        assertEquals("ProgramNode{nodes=[MathOpNode{left=MathOpNode{left=FloatNode{value=10.78}, " +
+        assertEquals("ProgramNode{nodes=[Optional[StatementsNode{statements=[AssignmentNode{variable=VariableNode{name=phips, value=null}," +
+                        " value=MathOpNode{left=MathOpNode{left=FloatNode{value=10.78}, " +
                         "op=MULTIPLY, right=IntegerNode{value=3}}, " +
-                        "op=ADD, right=MathOpNode{left=FloatNode{value=99.9}, " +
-                        "op=SUBTRACT, right=IntegerNode{value=67}}}]}"
+                        "op=ADD, right=MathOpNode{left=FloatNode{value=99.9}, op=SUBTRACT, right=IntegerNode{value=67}}}}]}]]}"
                 ,programNode.toString());
 
 
@@ -92,7 +96,7 @@ public class ParserJunit {
 
     @Test
     public void TestParser4() {
-        String content = " 2.3 + 9 * (9+3+4) / 2 "  ;
+        String content = " print 2.3 + 9 * (9+3+4) / 2 "  ;
         String srcDirectoryPath = "src/BasicArea";
         String basicFileName = "basic.basic";
         Path basicFilePath = Paths.get(srcDirectoryPath, basicFileName);
@@ -103,11 +107,11 @@ public class ParserJunit {
 
         //MathOpNode mathOpNode = (MathOpNode) programNode.getNodes().get(0);
 
-        assertEquals("ProgramNode{nodes=[MathOpNode{left=FloatNode{value=2.3}, " +
+        assertEquals("ProgramNode{nodes=[Optional[StatementsNode{statements=[PrintNode{nodes=[MathOpNode{left=FloatNode{value=2.3}, " +
                         "op=ADD, right=MathOpNode{left=MathOpNode{left=IntegerNode{value=9}, " +
                         "op=MULTIPLY, right=MathOpNode{left=MathOpNode{left=IntegerNode{value=9}, " +
-                        "op=ADD, right=IntegerNode{value=3}}, " +
-                        "op=ADD, right=IntegerNode{value=4}}}, op=DIVIDE, right=IntegerNode{value=2}}}]}"
+                        "op=ADD, right=IntegerNode{value=3}}, op=ADD, right=IntegerNode{value=4}}}, " +
+                        "op=DIVIDE, right=IntegerNode{value=2}}}]}]}]]}"
                 ,programNode.toString());
 
 
@@ -115,7 +119,7 @@ public class ParserJunit {
 
     @Test
     public void TestParserAssingment() {
-        String content = " print 1+2, \"Hello World\", 3.4, 5.6+22, \"Hello Water\" "  ;
+        String content = " Soda = 2.3 + 9 * (9+3+4) / 2 "  ;
         String srcDirectoryPath = "src/BasicArea";
         String basicFileName = "basic.basic";
         Path basicFilePath = Paths.get(srcDirectoryPath, basicFileName);
@@ -126,11 +130,15 @@ public class ParserJunit {
 
         //MathOpNode mathOpNode = (MathOpNode) programNode.getNodes().get(0);
 
-        assertEquals("ProgramNode{nodes=[MathOpNode{left=FloatNode{value=2.3}, " +
+        assertEquals("ProgramNode{nodes=[Optional[StatementsNode{" +
+                        "statements=[AssignmentNode{variable=VariableNode{name=Soda, value=null}, " +
+                        "value=MathOpNode{left=FloatNode{value=2.3}, " +
                         "op=ADD, right=MathOpNode{left=MathOpNode{left=IntegerNode{value=9}, " +
-                        "op=MULTIPLY, right=MathOpNode{left=MathOpNode{left=IntegerNode{value=9}, " +
-                        "op=ADD, right=IntegerNode{value=3}}, " +
-                        "op=ADD, right=IntegerNode{value=4}}}, op=DIVIDE, right=IntegerNode{value=2}}}]}"
+                        "op=MULTIPLY, " +
+                        "right=MathOpNode{left=MathOpNode{left=IntegerNode{value=9}," +
+                        " op=ADD, right=IntegerNode{value=3}}, " +
+                        "op=ADD, right=IntegerNode{value=4}}}, " +
+                        "op=DIVIDE, right=IntegerNode{value=2}}}}]}]]}"
                 ,programNode.toString());
 
 
