@@ -28,50 +28,75 @@ public class Parser {
      * @return ProgramNode representing the root of the AST.
      */
     public ProgramNode parse(){
-        LinkedList<Node> nodes = new LinkedList<>();
+        LinkedList<Optional<Node>> nodes = new LinkedList<>();
         while (handler.moreTokens()){
-            Optional<StatementNode> statement = statements();
-            if(statement.isPresent()){
-                nodes.add(statement.get());
-                handler.acceptSeparator(); // Skips token separators like semicolons, if present.
-            }
+            nodes.add(Optional.of(statements()));
+            handler.acceptSeparator(); // Skips token separators like semicolons, if present.
         }
         return new ProgramNode(nodes);
     }
 
 
-    public Optional<StatementNode> statements(){
+    public StatementsNode statements(){
+        StatementsNode statements = new StatementsNode();
         StatementNode statement = statement();
-        while (statement() != null){
-
-
+        while (statement != null){
+            statements.addStatement(statement);
+            handler.acceptSeparator();
+            statement = statement();
         }
-
-
-
-
-        return Optional.empty();
+        return  statements;
     }
-
 
 
         public StatementNode statement(){
         Optional<Token> assign = handler.matchAndRemove(Token.TokenType.WORD);
-        Optional<Token> print = handler.matchAndRemove(Token.TokenType.PRINT);
         if (assign.isPresent()){
             handler.acceptSeparator();
             if(handler.matchAndRemove(Token.TokenType.EQUALS).isPresent()){
                 VariableNode variable = new VariableNode(assign.get().getValue());
                 Optional<Node> expression = expression();
-                return expression.map(node -> new AssignmentNode(variable, node)).orElse(null);
+                if(expression.isPresent()){
+                    return new AssignmentNode(variable,expression.get());
+                }
             }
+            throw new RuntimeException("Missing word");
         }
-
+        if (handler.matchAndRemove(Token.TokenType.PRINT).isPresent()){
+            return printList();
+        }
        return null;
     }
 
 
+    public PrintNode printList(){
+        LinkedList<Node> nodes = new LinkedList<Node>();
+        do {
+            Token value = printAble();
+            if (value != null){
+                nodes.add(new VariableNode(value.getValue()));
+            }
+            else {
+                Optional<Node> expression = expression();
+                expression.ifPresent(nodes::add);
+            }
+        }while (handler.matchAndRemove(Token.TokenType.COMMA).isPresent());
 
+    return new PrintNode(nodes);
+    }
+
+
+
+    public Token printAble(){
+        Optional<Token> word = handler.matchAndRemove(Token.TokenType.WORD);
+
+        if(word.isPresent()){
+            return word.get();
+        }
+        Optional<Token> stringLit = handler.matchAndRemove(Token.TokenType.StringLiteral);
+        return stringLit.orElse(null);
+
+    }
 
 
 

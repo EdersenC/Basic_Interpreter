@@ -45,6 +45,7 @@ public class Lexer {
         tokenMap.put("function", Token.TokenType.Function);
         tokenMap.put("while", Token.TokenType.While);
         tokenMap.put("end", Token.TokenType.END);
+        tokenMap.put(",", Token.TokenType.COMMA);
 
 
 
@@ -149,11 +150,16 @@ public class Lexer {
             handleStringLiteral();
             handler.swallow(1);
         }
+            else if (nextChar == ','){
+                token.add(new Token(Token.TokenType.COMMA, ",", lineNumber, charPos));
+                handler.swallow(1);
+            }
             else
 
 
                 // Process a symbol token
                 processSymbol();
+
 
                 //System.out.print(processSymbol() + "\n");
         // Move to the next character in the input string
@@ -205,7 +211,11 @@ public class Lexer {
 
         charPos = charPos + pos;
         if (!end) {
-            token.add(new Token(Token.TokenType.WORD, word.toString(), lineNumber, charPos));
+            if (tokenMap.containsKey(word.toString())) {
+                token.add(new Token(tokenMap.get(word.toString()), word.toString(), lineNumber, charPos));
+            }
+            else
+                token.add(new Token(Token.TokenType.WORD, word.toString(), lineNumber, charPos));
         }
     }
 

@@ -58,7 +58,7 @@ public class Junit {
 
         try {
             //String content = new String(Files.readAllBytes(basicFilePath));
-            String content = "\n 5 hello \n 5.32 8.5 4\n \t 44";
+            String content = "\n 5, hello \n 5.32 8.5 4\n \t 44";
             Lexer lexer = new Lexer(content,0,0);
             lexer.lex("basic.basic");
             LinkedList<Token> tokens = lexer.lex("basic.basic");
@@ -66,11 +66,12 @@ public class Junit {
 
             assertEquals(Token.TokenType.ENDOFLINE, tokens.get(0).getType());
             assertEquals(Token.TokenType.NUMBER, tokens.get(1).getType());
-            assertEquals(Token.TokenType.WORD, tokens.get(2).getType());
-            assertEquals(Token.TokenType.ENDOFLINE, tokens.get(3).getType());
-            assertEquals(Token.TokenType.NUMBER, tokens.get(4).getType());
+            assertEquals(Token.TokenType.COMMA, tokens.get(2).getType());
+            assertEquals(Token.TokenType.WORD, tokens.get(3).getType());
+            assertEquals(Token.TokenType.ENDOFLINE, tokens.get(4).getType());
             assertEquals(Token.TokenType.NUMBER, tokens.get(5).getType());
-            assertEquals(Token.TokenType.NUMBER, tokens.get(5).getType());
+            assertEquals(Token.TokenType.NUMBER, tokens.get(6).getType());
+            assertEquals(Token.TokenType.NUMBER, tokens.get(7).getType());
 
 
         } catch (Exception e) {

@@ -1,20 +1,20 @@
 package Parsing.Nodes;
 
 import java.util.LinkedList;
-
+import java.util.Optional;
 
 
 public class ProgramNode extends Node {
 
-    private LinkedList<Node> nodes;
-    public ProgramNode(LinkedList<Node> nodes){
+    private LinkedList<Optional<Node>> nodes;
+    public ProgramNode(LinkedList<Optional<Node>> nodes){
         this.nodes = nodes;
     }
 
     /**
      * @return the node
      */
-    public LinkedList<Node> getNodes() {
+    public LinkedList<Optional<Node>> getNodes() {
         return nodes;
     }
 
