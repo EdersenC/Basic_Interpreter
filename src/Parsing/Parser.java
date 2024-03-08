@@ -57,22 +57,23 @@ public class Parser {
      * @return StatementNode representing the parsed statement.Eiter an assignment or a print statement.
      */
     public StatementNode statement(){
-        Optional<Token> assign = handler.matchAndRemove(Token.TokenType.WORD);
-        if (assign.isPresent()){
-            handler.acceptSeparator();
-            if(handler.matchAndRemove(Token.TokenType.EQUALS).isPresent()){
-                VariableNode variable = new VariableNode(assign.get().getValue());
-                Optional<Node> expression = expression();
-                if(expression.isPresent()){
-                    return new AssignmentNode(variable,expression.get());
-                }
-            }
-            throw new RuntimeException("Missing word");
+        AssignmentNode assignment = assignment();
+        if (assignment != null){
+        return assignment;
         }
         if (handler.matchAndRemove(Token.TokenType.PRINT).isPresent()){
             return printList();
         }
        return null;
+    }
+
+    /**
+     * Parses a string literal.
+     * @return StringNode representing the string literal.
+     */
+    public StringNode stringL(){
+        Optional<Token> stringLit = handler.matchAndRemove(Token.TokenType.StringLiteral);
+        return stringLit.map(token -> new StringNode(token.getValue())).orElse(null);
     }
 
 
@@ -83,9 +84,9 @@ public class Parser {
     public PrintNode printList(){
         LinkedList<Node> nodes = new LinkedList<Node>();
         do {
-            Token value = printAble();
+            Node value = printAble();
             if (value != null){
-                nodes.add(new VariableNode(value.getValue()));
+                nodes.add(value);
             }
             else {
                 Optional<Node> expression = expression();
@@ -102,18 +103,35 @@ public class Parser {
      * Parses a printable expression, handling both string literals and variables.
      * @return Token representing the printable expression.
      */
-    private Token printAble(){
+    private Node printAble(){
         Optional<Token> word = handler.matchAndRemove(Token.TokenType.WORD);
 
         if(word.isPresent()){
-            return word.get();
+            return new VariableNode(word.get().getValue());
         }
-        Optional<Token> stringLit = handler.matchAndRemove(Token.TokenType.StringLiteral);
-        return stringLit.orElse(null);
-
+        return stringL();
     }
 
 
+    /**
+     * Parses an assignment statement, handling the assignment of a value to a variable.
+     * @return AssignmentNode representing the parsed assignment statement.
+     */
+    public AssignmentNode assignment(){
+        Optional<Token> assign = handler.matchAndRemove(Token.TokenType.WORD);
+        if (assign.isPresent()){
+            handler.acceptSeparator();
+            if(handler.matchAndRemove(Token.TokenType.EQUALS).isPresent()){
+                VariableNode variable = new VariableNode(assign.get().getValue());
+                Optional<Node> expression = expression();
+                if(expression.isPresent()){
+                    return new AssignmentNode(variable,expression.get());
+                }
+            }
+            throw new RuntimeException("Missing word");
+        }
+        return null;
+    }
 
     /**
      * Parses expressions, handling binary operations such as addition and subtraction.
