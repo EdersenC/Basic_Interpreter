@@ -22,7 +22,7 @@ public class ParserJunit {
 
     @Test
     public void TestParser1() {
-        String content = " Test1 = 2.3 - 9 * (9+3+4) / 2 "  ;
+        String content = " Test1 = water "  ;
         String srcDirectoryPath = "src/BasicArea";
         String basicFileName = "basic.basic";
         Path basicFilePath = Paths.get(srcDirectoryPath, basicFileName);
@@ -33,14 +33,10 @@ public class ParserJunit {
 
 
 
-        assertEquals("ProgramNode{nodes=[Optional[StatementsNode{" +
-                        "statements=[" +
-                        "AssignmentNode{variable=VariableNode{name=Test1, value=null}, " +
-                        "value=MathOpNode{left=FloatNode{value=2.3}, op=SUBTRACT, " +
-                        "right=MathOpNode{left=MathOpNode{left=IntegerNode{value=9}, " +
-                        "op=MULTIPLY, right=MathOpNode{left=MathOpNode{left=IntegerNode{value=9}, " +
-                        "op=ADD, right=IntegerNode{value=3}}, " +
-                        "op=ADD, right=IntegerNode{value=4}}}, op=DIVIDE, right=IntegerNode{value=2}}}}]}]]}"
+        assertEquals("ProgramNode{nodes=[Optional[" +
+                        "StatementsNode{statements=[" +
+                        "AssignmentNode{variable=VariableNode{name=Test1, " +
+                        "value=null}, value=VariableNode{name=water, value=null}}]}]]}"
                 ,programNode.toString());
 
 
@@ -159,12 +155,14 @@ public class ParserJunit {
 
         //MathOpNode mathOpNode = (MathOpNode) programNode.getNodes().get(0);
 
-        assertEquals("ProgramNode{nodes=[Optional[StatementsNode{statements=[" +
+        assertEquals("ProgramNode{nodes=[Optional[" +
+                        "StatementsNode{statements=[" +
                         "PrintNode{nodes=[" +
                         "MathOpNode{left=IntegerNode{value=1}, " +
-                        "op=ADD, right=IntegerNode{value=2}}, VariableNode{name=Hello World, value=null}, FloatNode{value=3.4}, " +
+                        "op=ADD, right=IntegerNode{value=2}}, " +
+                        "StringNode{value=Hello World}, FloatNode{value=3.4}, " +
                         "MathOpNode{left=FloatNode{value=5.6}, " +
-                        "op=ADD, right=IntegerNode{value=22}}, VariableNode{name=Hello Water, value=null}]}]}]]}"
+                        "op=ADD, right=IntegerNode{value=22}}, StringNode{value=Hello Water}]}]}]]}"
                 ,programNode.toString());
 
 

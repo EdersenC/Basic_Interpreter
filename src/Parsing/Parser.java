@@ -31,7 +31,7 @@ public class Parser {
         LinkedList<Optional<Node>> nodes = new LinkedList<>();
         while (handler.moreTokens()){
             nodes.add(Optional.of(statements()));
-            handler.acceptSeparator(); // Skips token separators like semicolons, if present.
+            handler.acceptSeparator(); // skips EndLine Tokens
         }
         return new ProgramNode(nodes);
     }
@@ -67,15 +67,6 @@ public class Parser {
        return null;
     }
 
-    /**
-     * Parses a string literal.
-     * @return StringNode representing the string literal.
-     */
-    public StringNode stringL(){
-        Optional<Token> stringLit = handler.matchAndRemove(Token.TokenType.StringLiteral);
-        return stringLit.map(token -> new StringNode(token.getValue())).orElse(null);
-    }
-
 
     /**
      * Parses a print statement, handling the list of printable expressions.
@@ -88,10 +79,8 @@ public class Parser {
             if (value != null){
                 nodes.add(value);
             }
-            else {
-                Optional<Node> expression = expression();
-                expression.ifPresent(nodes::add);
-            }
+            else
+                expression().ifPresent(nodes::add);
         }while (handler.matchAndRemove(Token.TokenType.COMMA).isPresent());
 
     return new PrintNode(nodes);
@@ -105,11 +94,20 @@ public class Parser {
      */
     private Node printAble(){
         Optional<Token> word = handler.matchAndRemove(Token.TokenType.WORD);
-
         if(word.isPresent()){
             return new VariableNode(word.get().getValue());
         }
-        return stringL();
+        return stringLiteral();
+    }
+
+    /**
+     * Parses a string literal.
+     * @return StringNode representing the string literal.
+     */
+    public StringNode stringLiteral(){
+        return handler.matchAndRemove(Token.TokenType.StringLiteral)
+                .map(token -> new StringNode(token.getValue()))
+                .orElse(null);
     }
 
 
@@ -120,13 +118,10 @@ public class Parser {
     public AssignmentNode assignment(){
         Optional<Token> assign = handler.matchAndRemove(Token.TokenType.WORD);
         if (assign.isPresent()){
-            handler.acceptSeparator();
             if(handler.matchAndRemove(Token.TokenType.EQUALS).isPresent()){
-                VariableNode variable = new VariableNode(assign.get().getValue());
-                Optional<Node> expression = expression();
-                if(expression.isPresent()){
-                    return new AssignmentNode(variable,expression.get());
-                }
+                return expression()
+                        .map(node -> new AssignmentNode(new VariableNode(assign.get().getValue()), node))
+                        .orElse(null);
             }
             throw new RuntimeException("Missing word");
         }
@@ -140,17 +135,11 @@ public class Parser {
      */
     public Optional<Node> expression() {
         Optional<Node> left = term();
-        Optional<Token> plus = handler.matchAndRemove(Token.TokenType.PLUS);
-        Optional<Token> minus = handler.matchAndRemove(Token.TokenType.MINUS);
-        while (plus.isPresent() || minus.isPresent()){
-            if(plus.isPresent()){
-                left = Optional.of(new MathOpNode(left.get(), MathOpNode.MathOp.ADD, term().get()));
-            }
-            if(minus.isPresent()) {
-                left = Optional.of(new MathOpNode(left.get(), MathOpNode.MathOp.SUBTRACT, term().get()));
-            }
-            plus = handler.matchAndRemove(Token.TokenType.PLUS);
-            minus = handler.matchAndRemove(Token.TokenType.MINUS);
+        while (handler.matchAndRemove(Token.TokenType.PLUS).isPresent()){
+            left = Optional.of(new MathOpNode(left.get(), MathOpNode.MathOp.ADD, term().get()));
+        }
+        while (handler.matchAndRemove(Token.TokenType.MINUS).isPresent()){
+            left = Optional.of(new MathOpNode(left.get(), MathOpNode.MathOp.SUBTRACT, term().get()));
         }
         return left;
     }
@@ -162,17 +151,11 @@ public class Parser {
      */
     public Optional<Node> term(){
         Optional<Node> left = factor();
-        Optional<Token> multiply = handler.matchAndRemove(Token.TokenType.MULTIPLY);
-        Optional<Token> divide = handler.matchAndRemove(Token.TokenType.DIVIDE);
-        while (multiply.isPresent() || divide.isPresent()){
-            if(multiply.isPresent()){
-                left = Optional.of(new MathOpNode(left.get(), MathOpNode.MathOp.MULTIPLY, factor().get()));
-            }
-            if(divide.isPresent()) {
-                left = Optional.of(new MathOpNode(left.get(), MathOpNode.MathOp.DIVIDE, factor().get()));
-            }
-            multiply = handler.matchAndRemove(Token.TokenType.MULTIPLY);
-            divide = handler.matchAndRemove(Token.TokenType.DIVIDE);
+        while (handler.matchAndRemove(Token.TokenType.MULTIPLY).isPresent()) {
+            left = Optional.of(new MathOpNode(left.get(), MathOpNode.MathOp.MULTIPLY, factor().get()));
+        }
+        while (handler.matchAndRemove(Token.TokenType.DIVIDE).isPresent()){
+            left = Optional.of(new MathOpNode(left.get(), MathOpNode.MathOp.DIVIDE, factor().get()));
         }
         return left;
     }
@@ -186,18 +169,18 @@ public class Parser {
         Optional<Token> number = handler.matchAndRemove(Token.TokenType.NUMBER);
         // If the token is a number, it is either an integer or a float.
         if(number.isPresent()){
-            return intOrFloat(number);
+            return intOrFloat(number.get());
         }
-        if (handler.matchAndRemove(Token.TokenType.WORD).isPresent()){
-            return Optional.of(new VariableNode(number.get().getValue()));
+        Optional<Token> word = handler.matchAndRemove(Token.TokenType.WORD);
+        if (word.isPresent()){
+            return Optional.of(new VariableNode(word.get().getValue()));
         }
         if (handler.matchAndRemove(Token.TokenType.LEFT_PAREN).isPresent()){
             Optional<Node> expression = expression();
             if(expression.isPresent() && handler.matchAndRemove(Token.TokenType.RIGHT_PAREN).isPresent()){
                 return expression;
-            } else {
+            } else
                 throw new RuntimeException("Expected Right Parenthesis");
-            }
         }
         return Optional.empty();
     }
@@ -207,11 +190,11 @@ public class Parser {
      * @param number The token to convert.
      * @return Optional containing the Node representing the number, if parsed successfully.
      */
-    private Optional<Node> intOrFloat(Optional<Token> number) {
+    private Optional<Node> intOrFloat(Token number) {
         try {
-            return Optional.of(new IntergerNode(Integer.parseInt(number.get().getValue())));
+            return Optional.of(new IntergerNode(Integer.parseInt(number.getValue())));
         } catch (NumberFormatException e){
-            return Optional.of(new FloatNode(Float.parseFloat(number.get().getValue())));
+            return Optional.of(new FloatNode(Float.parseFloat(number.getValue())));
         }
     }
 
