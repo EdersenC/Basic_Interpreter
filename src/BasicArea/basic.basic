@@ -1,1 +1,4 @@
-2 + 9 * (9+3+4) / 2
+data "Water", 450, 3.44, 0.0, "Fire"
+read pizza, dog, sad%, happy, cat$
+print 98+99, Soda$, 40.3, "Hello", 3.14, 45
+input "What is your name? ", name$

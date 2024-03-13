@@ -161,13 +161,13 @@ public class Lexer {
                 // Process a symbol token
                 processSymbol();
 
-
                 //System.out.print(processSymbol() + "\n");
         // Move to the next character in the input string
 
         //handler.swallow(1);
 
         }
+        token.add(new Token(Token.TokenType.ENDOFLINE, lineNumber,charPos));
     //System.out.println(token);
     return token;
 

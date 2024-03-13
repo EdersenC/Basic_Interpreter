@@ -60,13 +60,19 @@ public class Parser {
         return assignment;
         }
         if (handler.matchAndRemove(Token.TokenType.PRINT).isPresent()){
-            return printList();
+            PrintNode printNode = new PrintNode();
+            handleCommas(printNode);
+            return printNode;
         }
         if (handler.matchAndRemove(Token.TokenType.READ).isPresent()){
-            return readList();
+            ReadNode readNode = new ReadNode();
+            handleCommas(readNode);
+            return readNode;
         }
         if (handler.matchAndRemove(Token.TokenType.DATA).isPresent()){
-            return DataList();
+            DataNode dataNode = new DataNode();
+            handleCommas(dataNode);
+            return dataNode;
         }
         if (handler.matchAndRemove(Token.TokenType.INPUT).isPresent()){
             return inputList();
@@ -75,37 +81,8 @@ public class Parser {
     }
 
     /**
-     * Parses a print statement, handling the list of printable expressions.
-     * @return PrintNode representing the print statement.
-     */
-    public PrintNode printList(){
-        PrintNode printNode = new PrintNode();
-        handleCommas(printNode);
-        return printNode;
-    }
-
-    /**
-     * Parses a read statement, handling the list of variables to be read into.
-     * @return ReadNode representing the read statement.
-     */
-    private ReadNode readList(){
-        ReadNode readNode = new ReadNode();
-        handleCommas(readNode);
-        return readNode;
-    }
-
-    /**
-     * Parses a data statement, handling the list of data values.
-     * @return DataNode representing the data statement.
-     */
-    private DataNode DataList(){
-        DataNode dataNode = new DataNode();
-        handleCommas(dataNode);
-        return dataNode;
-    }
-
-    /**
      * Parses an input statement, handling the list of input variables.
+     * With the first parameter being a Variable or a StringNode
      * @return InputNode representing the input statement.
      */
     private InputNode inputList(){
@@ -125,6 +102,11 @@ public class Parser {
         return inputNode;
     }
 
+    /**
+     * Handles the parsing of comma-separated lists of expressions and variables.
+     * This method is used to parse the arguments of print and input statements, as well as the data statement.
+     * @param node The node to which the parsed expressions or variables will be added.
+     */
     private void handleCommas(Node node){
         do {
             if (node instanceof PrintNode){
@@ -141,13 +123,15 @@ public class Parser {
             if (node instanceof DataNode){
                 ((DataNode) node).addNode(constant());
                 Optional<Node> number = intOrFloat();
-                if (number.isPresent())
-                    ((DataNode) node).addNode(number.get());
+                number.ifPresent(value -> ((DataNode) node).addNode(value));
             }
             if (node instanceof InputNode){
                 ((InputNode) node).addVariable(variable());
             }
         }while (handler.matchAndRemove(Token.TokenType.COMMA).isPresent());
+        if (handler.matchAndRemove(Token.TokenType.ENDOFLINE).isEmpty()){
+            throw new RuntimeException("Invalid Syntax");
+        }
 
     }
 

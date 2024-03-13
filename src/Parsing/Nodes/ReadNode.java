@@ -11,8 +11,9 @@ public class ReadNode extends StatementNode {
      * @param variable the variable to be added
      */
     public void addVariable(VariableNode variable){
-        if (variable != null)
-            variables.add(variable);
+        if (variable == null)
+            throw new IllegalArgumentException("Invalid Syntax Not A Variable");
+        variables.add(variable);
     }
 
     public String toString(){
