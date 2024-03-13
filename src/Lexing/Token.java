@@ -48,7 +48,9 @@ public class Token {
 
         DIVIDE,
         LABEL,
+        INPUT,
         COMMA
+
 
     }
 

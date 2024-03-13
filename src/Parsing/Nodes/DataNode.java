@@ -5,22 +5,24 @@ import java.util.LinkedList;
 public class DataNode extends StatementNode {
 
 
-    private LinkedList<Node> nodes = new LinkedList<>();
+    private final LinkedList<Node> nodes = new LinkedList<>();
 
-
-    public DataNode(LinkedList<Node> nodes){
-        this.nodes = nodes;
+    /**
+     * @param node the node to be added
+     */
+    public void addNode(Node node){
+        if (node != null)
+            nodes.add(node);
     }
-
 
     /**
      * @return the node as a string
      */
-    public String toString(){
-        return "DataNode{}";
+    public String toString() {
+        return "DataNode{" +
+                "nodes=" + nodes +
+                '}';
     }
-
-
 
 
 

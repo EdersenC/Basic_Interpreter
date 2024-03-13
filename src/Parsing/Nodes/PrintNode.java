@@ -7,19 +7,17 @@ import java.util.LinkedList;
  */
 public class PrintNode extends StatementNode{
 
-    private LinkedList<Node> nodes;
+    private final LinkedList<Node> nodes = new LinkedList<>();
 
-
-    public PrintNode(LinkedList<Node> nodes){
-        this.nodes = nodes;
-    }
 
     /**
-     * @return the node
+     * @param node the node to be added
      */
-    public LinkedList<Node> getNodes() {
-        return nodes;
+    public void addNode(Node node){
+        if (node != null)
+            nodes.add(node);
     }
+
     /**
      * @return the node as a string
      * PrintNode{nodes=[VariableNode{name=a, value=FloatNode{value=5.0}}, FloatNode{value=5.0}]}

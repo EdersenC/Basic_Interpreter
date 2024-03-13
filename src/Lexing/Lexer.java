@@ -45,6 +45,7 @@ public class Lexer {
         tokenMap.put("function", Token.TokenType.Function);
         tokenMap.put("while", Token.TokenType.While);
         tokenMap.put("end", Token.TokenType.END);
+        tokenMap.put("input", Token.TokenType.INPUT);
         tokenMap.put(",", Token.TokenType.COMMA);
 
 
@@ -246,6 +247,7 @@ public class Lexer {
      * This method is used to process a string literal token
      */
     public void handleStringLiteral(){
+        //TODO This Method is very inefficient and slow
         int pos = 0;
         boolean escaped = false;
         StringBuilder string = new StringBuilder();

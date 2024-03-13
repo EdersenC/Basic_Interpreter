@@ -170,12 +170,97 @@ public class ParserJunit {
 
 
 
+    @Test
+    public void TestReadNode() {
+        String content = " read soda, water, pizza"  ;
+        String srcDirectoryPath = "src/BasicArea";
+        String basicFileName = "basic.basic";
+        Path basicFilePath = Paths.get(srcDirectoryPath, basicFileName);
+        LinkedList<Token> tokens = runLex(null, content);
+        Parser parser = new Parser(tokens);
+        ProgramNode programNode = parser.parse();
+        System.out.println(programNode.toString());
+
+        //MathOpNode mathOpNode = (MathOpNode) programNode.getNodes().get(0);
+
+        assertEquals("ProgramNode{nodes=[Optional[" +
+                        "StatementsNode{statements=[" +
+                        "ReadNode{variables=[" +
+                        "VariableNode{name=soda, value=null}, " +
+                        "VariableNode{name=water, value=null}, " +
+                        "VariableNode{name=pizza, value=null}]}]}]]}"
+                ,programNode.toString());
+
+
+    }
+
+    @Test
+    public void TestDataNode() {
+        String content = "data  \"water\", 420, 6.9"  ;
+        String srcDirectoryPath = "src/BasicArea";
+        String basicFileName = "basic.basic";
+        Path basicFilePath = Paths.get(srcDirectoryPath, basicFileName);
+        LinkedList<Token> tokens = runLex(null, content);
+        Parser parser = new Parser(tokens);
+        ProgramNode programNode = parser.parse();
+        System.out.println(programNode.toString());
+
+        //MathOpNode mathOpNode = (MathOpNode) programNode.getNodes().get(0);
+
+        assertEquals("ProgramNode{nodes=[Optional[StatementsNode{statements=[" +
+                        "DataNode{nodes=[StringNode{value=water}, " +
+                        "IntegerNode{value=420}, FloatNode{value=6.9}]}]}]]}"
+                ,programNode.toString());
+
+
+    }
+
+
+    @Test
+    public void TestInputNode() {
+        String content = "input  \"StringMexico\", Chicken, Phips";
+        String srcDirectoryPath = "src/BasicArea";
+        String basicFileName = "basic.basic";
+        Path basicFilePath = Paths.get(srcDirectoryPath, basicFileName);
+        LinkedList<Token> tokens = runLex(null, content);
+        Parser parser = new Parser(tokens);
+        ProgramNode programNode = parser.parse();
+        System.out.println(programNode.toString());
+
+
+        //Test the input node With a string
+        assertEquals("ProgramNode{nodes=[Optional[StatementsNode{statements=[" +
+                        "InputNode{constant=StringNode{value=StringMexico}, " +
+                        "variableList=[VariableNode{name=Chicken, value=null}, " +
+                        "VariableNode{name=Phips, value=null}]}]}]]}"
+                ,programNode.toString());
+
+         content = "input  VariableMexico, Chicken, Phips, water";
+         tokens = runLex(null, content);
+         parser = new Parser(tokens);
+         programNode = parser.parse();
+
+         //Test the input node With a variable
+        assertEquals("ProgramNode{nodes=[Optional[StatementsNode{statements=[" +
+                        "InputNode{Variable=VariableNode{name=VariableMexico, value=null}, " +
+                        "variableList=[VariableNode{name=Chicken, value=null}, " +
+                        "VariableNode{name=Phips, value=null}, " +
+                        "VariableNode{name=water, value=null}]}]}]]}"
+                ,programNode.toString());
+
+
+
+    }
+
+
+
+
     public LinkedList<Token> runLex(Path filePath,String testMessage){
         Boolean isFilPath = filePath != null;
         Lexer lexer = isFilPath ? new Lexer(filePath,1,0) : new Lexer(testMessage,1,0);
         lexer.lex("basic.basic");
         LinkedList<Token> tokens = lexer.lex("basic.basic");
-        System.out.println("Contents: %s \n Tokens: %s ".formatted(filePath, tokens.toString()));
+        System.out.printf("Contents: %s \n Tokens: %s \n", filePath, tokens.toString());
         System.out.println("DONE LEXING");
         return tokens;
     }

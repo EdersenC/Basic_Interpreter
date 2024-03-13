@@ -15,10 +15,10 @@ public class StringNode extends Node {
         return value;
     }
 
-    /**
-     * @return the AST representation of the node
-     */
 
+    /**
+     * @return the node as a string
+     */
     public String toString(){
         return "StringNode{" +
                 "value=" + value +

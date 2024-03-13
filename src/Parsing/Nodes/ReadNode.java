@@ -5,12 +5,15 @@ import java.util.LinkedList;
 public class ReadNode extends StatementNode {
 
 
-    LinkedList<VariableNode> variables = new LinkedList<>();
+   private final LinkedList<VariableNode> variables = new LinkedList<>();
 
-    public ReadNode(LinkedList<VariableNode> variables){
-        this.variables = variables;
+    /**
+     * @param variable the variable to be added
+     */
+    public void addVariable(VariableNode variable){
+        if (variable != null)
+            variables.add(variable);
     }
-
 
     public String toString(){
         return "ReadNode{" +

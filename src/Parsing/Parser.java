@@ -36,7 +36,6 @@ public class Parser {
         return new ProgramNode(nodes);
     }
 
-
     /**
      * Parses a list of statements, handling both assignments and print statements.
      * @return StatementsNode representing the parsed list of statements.
@@ -51,10 +50,9 @@ public class Parser {
         }
         return  statements;
     }
-
     /**
-     * Parses a statement, handling both assignments and print statements.
-     * @return StatementNode representing the parsed statement.Eiter an assignment or a print statement.
+     * Parses a single statement, handling assignments, print statements, and other statement types.
+     * @return StatementNode representing the parsed statement.
      */
     public StatementNode statement(){
         AssignmentNode assignment = assignment();
@@ -64,47 +62,111 @@ public class Parser {
         if (handler.matchAndRemove(Token.TokenType.PRINT).isPresent()){
             return printList();
         }
+        if (handler.matchAndRemove(Token.TokenType.READ).isPresent()){
+            return readList();
+        }
+        if (handler.matchAndRemove(Token.TokenType.DATA).isPresent()){
+            return DataList();
+        }
+        if (handler.matchAndRemove(Token.TokenType.INPUT).isPresent()){
+            return inputList();
+        }
        return null;
     }
-
 
     /**
      * Parses a print statement, handling the list of printable expressions.
      * @return PrintNode representing the print statement.
      */
     public PrintNode printList(){
-        LinkedList<Node> nodes = new LinkedList<Node>();
+        PrintNode printNode = new PrintNode();
+        handleCommas(printNode);
+        return printNode;
+    }
+
+    /**
+     * Parses a read statement, handling the list of variables to be read into.
+     * @return ReadNode representing the read statement.
+     */
+    private ReadNode readList(){
+        ReadNode readNode = new ReadNode();
+        handleCommas(readNode);
+        return readNode;
+    }
+
+    /**
+     * Parses a data statement, handling the list of data values.
+     * @return DataNode representing the data statement.
+     */
+    private DataNode DataList(){
+        DataNode dataNode = new DataNode();
+        handleCommas(dataNode);
+        return dataNode;
+    }
+
+    /**
+     * Parses an input statement, handling the list of input variables.
+     * @return InputNode representing the input statement.
+     */
+    private InputNode inputList(){
+        //TODO Make this better, dont like the null's!!
+        VariableNode variable = variable();
+        InputNode inputNode;
+        if (variable != null){
+            inputNode = new InputNode(variable);
+        }
+        else {
+            StringNode constant = constant();
+            if (constant == null)
+                throw new RuntimeException("Expected a variable");
+            inputNode = new InputNode(constant);
+        }
+        handleCommas(inputNode);
+        return inputNode;
+    }
+
+    private void handleCommas(Node node){
         do {
-            Node value = printAble();
-            if (value != null){
-                nodes.add(value);
+            if (node instanceof PrintNode){
+                ((PrintNode) node).addNode(variable());
+                ((PrintNode) node).addNode(constant());
+                expression().ifPresent(((PrintNode) node)::addNode);
             }
-            else
-                expression().ifPresent(nodes::add);
+            if (node instanceof ReadNode){
+                    ((ReadNode) node).addVariable(variable());
+            }
+            if (node instanceof InputNode){
+                ((InputNode) node).addVariable(variable());
+            }
+            if (node instanceof DataNode){
+                ((DataNode) node).addNode(constant());
+                Optional<Node> number = intOrFloat();
+                if (number.isPresent())
+                    ((DataNode) node).addNode(number.get());
+            }
+            if (node instanceof InputNode){
+                ((InputNode) node).addVariable(variable());
+            }
         }while (handler.matchAndRemove(Token.TokenType.COMMA).isPresent());
 
-    return new PrintNode(nodes);
     }
 
 
-    // this functions checks what tokens types are printable
     /**
-     * Parses a printable expression, handling both string literals and variables.
-     * @return Token representing the printable expression.
+     * Parses a variable.
+     * @return VariableNode representing the parsed variable.
      */
-    private Node printAble(){
-        Optional<Token> word = handler.matchAndRemove(Token.TokenType.WORD);
-        if(word.isPresent()){
-            return new VariableNode(word.get().getValue());
-        }
-        return stringLiteral();
+    private VariableNode variable(){
+        return handler.matchAndRemove(Token.TokenType.WORD)
+                .map(token -> new VariableNode(token.getValue()))
+                .orElse(null);
     }
 
     /**
      * Parses a string literal.
      * @return StringNode representing the string literal.
      */
-    public StringNode stringLiteral(){
+    public StringNode constant(){
         return handler.matchAndRemove(Token.TokenType.StringLiteral)
                 .map(token -> new StringNode(token.getValue()))
                 .orElse(null);
@@ -166,10 +228,10 @@ public class Parser {
      * @return Optional containing the Node representing the factor, if parsed successfully.
      */
     public Optional<Node> factor(){
-        Optional<Token> number = handler.matchAndRemove(Token.TokenType.NUMBER);
+        Optional<Node> number = intOrFloat();
         // If the token is a number, it is either an integer or a float.
         if(number.isPresent()){
-            return intOrFloat(number.get());
+            return number;
         }
         Optional<Token> word = handler.matchAndRemove(Token.TokenType.WORD);
         if (word.isPresent()){
@@ -187,14 +249,17 @@ public class Parser {
 
     /**
      * Converts a token representing a number into an integer or float node.
-     * @param number The token to convert.
      * @return Optional containing the Node representing the number, if parsed successfully.
      */
-    private Optional<Node> intOrFloat(Token number) {
+    private Optional<Node> intOrFloat() {
+        Optional<Token> number =  handler.matchAndRemove(Token.TokenType.NUMBER);
+        if (number.isEmpty()){
+            return Optional.empty();
+        }
         try {
-            return Optional.of(new IntergerNode(Integer.parseInt(number.getValue())));
+            return Optional.of(new IntergerNode(Integer.parseInt(number.get().getValue())));
         } catch (NumberFormatException e){
-            return Optional.of(new FloatNode(Float.parseFloat(number.getValue())));
+            return Optional.of(new FloatNode(Float.parseFloat(number.get().getValue())));
         }
     }
 
