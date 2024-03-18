@@ -16,6 +16,10 @@ public class ReadNode extends StatementNode {
         variables.add(variable);
     }
 
+
+    /**
+     * @return the node as a string
+     */
     public String toString(){
         return "ReadNode{" +
                 "variables=" + variables +
