@@ -95,7 +95,7 @@ public class Junit {
         try {
             //String content = new String(Files.readAllBytes(basicFilePath));'
             String content = " myLabel: Fax = 9.4 \n story = \" \\\"She said Wonk Wonk\\\" \" water "  ;
-            Lexer lexer = new Lexer(basicFilePath,0,0);
+            Lexer lexer = new Lexer(content,0,0);
             lexer.lex("basic.basic");
             LinkedList<Token> tokens = lexer.lex("basic.basic");
             System.out.println("Contents: %s \n Tokens: %s ".formatted(content, tokens.toString()));
@@ -125,7 +125,7 @@ public class Junit {
         String srcDirectoryPath = "src/BasicArea";
         String basicFileName = "basic.basic";
         Path basicFilePath = Paths.get(srcDirectoryPath, basicFileName);
-        LinkedList<Token> tokens = runLex(basicFilePath,null);
+        LinkedList<Token> tokens = runLex(null,content);
 
             assertEquals(Token.TokenType.LABEL, tokens.get(0).getType());
             assertEquals(Token.TokenType.NUMBER, tokens.get(1).getType());

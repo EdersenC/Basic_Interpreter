@@ -57,6 +57,12 @@ public class Parser {
      * @return StatementNode representing the parsed statement.Eiter an assignment or a print statement.
      */
     public StatementNode statement(){
+        Optional<Token> label = handler.matchAndRemove(Token.TokenType.LABEL);
+        if (label.isPresent()){
+            handler.acceptSeparator();
+            StatementNode statement = statement();
+            return new LabelNode(label.get().getValue(), statement);
+        }
         Optional<Token> assign = handler.matchAndRemove(Token.TokenType.WORD);
         if (assign.isPresent()){
             handler.acceptSeparator();
