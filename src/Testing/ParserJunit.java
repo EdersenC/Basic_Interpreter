@@ -1,10 +1,7 @@
 package Testing;
 
-import Lexing.CodeHandler;
 import Lexing.Lexer;
 import Lexing.Token;
-import Parsing.Nodes.IntergerNode;
-import Parsing.Nodes.MathOpNode;
 import Parsing.Nodes.ProgramNode;
 import Parsing.Parser;
 import org.junit.Test;
@@ -251,6 +248,100 @@ public class ParserJunit {
 
 
     }
+
+
+
+    @Test
+    public void TestLabel() {
+        String content = "CallMe: print 1+2, \"Hello World\", 3.4, 5.6+22, \"Hello Water\" "  ;
+        String srcDirectoryPath = "src/BasicArea";
+        String basicFileName = "basic.basic";
+        Path basicFilePath = Paths.get(srcDirectoryPath, basicFileName);
+        LinkedList<Token> tokens = runLex(null, content);
+        Parser parser = new Parser(tokens);
+        ProgramNode programNode = parser.parse();
+        System.out.println(programNode.toString());
+
+        //MathOpNode mathOpNode = (MathOpNode) programNode.getNodes().get(0);
+
+        assertEquals("ProgramNode{nodes=[Optional[StatementsNode{statements=" +
+                        "[LabelNode{label='CallMe', statement=PrintNode{nodes=[" +
+                        "MathOpNode{left=IntegerNode{value=1}, " +
+                        "op=ADD, right=IntegerNode{value=2}}, " +
+                        "StringNode{value=Hello World}, FloatNode{value=3.4}, MathOpNode{left=FloatNode{value=5.6}, " +
+                        "op=ADD, right=IntegerNode{value=22}}, StringNode{value=Hello Water}]}}]}]]}"
+                ,programNode.toString());
+    }
+
+
+
+    @Test
+    public void TestIF() {
+        String content = "if pizza < 2+99-33 + (3*5.3) then water"  ;
+        String srcDirectoryPath = "src/BasicArea";
+        String basicFileName = "basic.basic";
+        Path basicFilePath = Paths.get(srcDirectoryPath, basicFileName);
+        LinkedList<Token> tokens = runLex(null, content);
+        Parser parser = new Parser(tokens);
+        ProgramNode programNode = parser.parse();
+        System.out.println(programNode.toString());
+
+        //MathOpNode mathOpNode = (MathOpNode) programNode.getNodes().get(0);
+
+        assertEquals("ProgramNode{nodes=[Optional[StatementsNode{statements=[" +
+                        "IF{condition='Optional[MathOpNode{left=VariableNode{name=pizza, value=null}, boolOp=LESS_THAN, " +
+                        "right=MathOpNode{left=MathOpNode{left=MathOpNode{left=IntegerNode{value=2}, " +
+                        "op=ADD, right=IntegerNode{value=99}}, op=SUBTRACT, right=IntegerNode{value=33}}, " +
+                        "op=ADD, right=MathOpNode{left=IntegerNode{value=3}, " +
+                        "op=MULTIPLY, right=FloatNode{value=5.3}}}}]', thenStatement=water}]}]]}"
+                ,programNode.toString());
+    }
+
+
+    @Test
+    public void TestGoSub() {
+        String content = "gosub CallMe"  ;
+        String srcDirectoryPath = "src/BasicArea";
+        String basicFileName = "basic.basic";
+        Path basicFilePath = Paths.get(srcDirectoryPath, basicFileName);
+        LinkedList<Token> tokens = runLex(null, content);
+        Parser parser = new Parser(tokens);
+        ProgramNode programNode = parser.parse();
+        System.out.println(programNode.toString());
+
+        //MathOpNode mathOpNode = (MathOpNode) programNode.getNodes().get(0);
+
+        assertEquals("ProgramNode{nodes=[Optional[StatementsNode{statements=[" +
+                        "GoSub{identifier='CallMe'}]}]]}"
+                ,programNode.toString());
+    }
+
+
+    @Test
+    public void TestReturn() {
+        String content = "x = 2.3 + 9 * (9+3+4) / 2 \n return"  ;
+        String srcDirectoryPath = "src/BasicArea";
+        String basicFileName = "basic.basic";
+        Path basicFilePath = Paths.get(srcDirectoryPath, basicFileName);
+        LinkedList<Token> tokens = runLex(null, content);
+        Parser parser = new Parser(tokens);
+        ProgramNode programNode = parser.parse();
+        System.out.println(programNode.toString());
+
+        //MathOpNode mathOpNode = (MathOpNode) programNode.getNodes().get(0);
+
+        assertEquals("ProgramNode{nodes=[Optional[StatementsNode{statements=[" +
+                        "AssignmentNode{variable=VariableNode{name=x, value=null}, " +
+                        "value=MathOpNode{left=FloatNode{value=2.3}, " +
+                        "op=ADD, right=MathOpNode{left=MathOpNode{left=IntegerNode{value=9}, " +
+                        "op=MULTIPLY, right=MathOpNode{left=MathOpNode{left=IntegerNode{value=9}, op=ADD, right=IntegerNode{value=3}}, op=ADD, right=IntegerNode{value=4}}}," +
+                        " op=DIVIDE, right=IntegerNode{value=2}}}}, Return{}]}]]}"
+                ,programNode.toString());
+    }
+
+
+
+
 
 
 

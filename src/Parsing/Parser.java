@@ -55,10 +55,30 @@ public class Parser {
      * @return StatementNode representing the parsed statement.
      */
     public StatementNode statement(){
-        AssignmentNode assignment = assignment();
-        if (assignment != null){
-        return assignment;
+
+        if (handler.matchAndRemove(Token.TokenType.GOSUB).isPresent()){
+            return new GoSub(handler.matchAndRemove(Token.TokenType.WORD)
+                    .map(Token::getValue)
+                    .orElse(null));
         }
+        Optional<Token> token = handler.matchAndRemove(Token.TokenType.RETURN);
+        if (token.isPresent()){
+            return new Return();
+        }
+        if (handler.matchAndRemove(Token.TokenType.IF).isPresent()){
+            return IF();
+        }
+        if (handler.matchAndRemove(Token.TokenType.FOR).isPresent()){
+            return new ForNode(handler.matchAndRemove(Token.TokenType.WORD)
+                    .map(Token::getValue)
+                    .orElse(null), expression().get(), expression().get());
+        }
+
+        LabelNode token1 = label();
+        if (token1 != null) return token1;
+        AssignmentNode assignment = assignment();
+        if (assignment != null) return assignment;
+
         if (handler.matchAndRemove(Token.TokenType.PRINT).isPresent()){
             PrintNode printNode = new PrintNode();
             handleCommas(printNode);
@@ -79,6 +99,70 @@ public class Parser {
         }
        return null;
     }
+
+
+    /**
+     * Parses a label statement, handling the label identifier and the statement to be executed.
+     * @return LabelNode representing the parsed label statement.
+     */
+    private LabelNode label() {
+        return handler.matchAndRemove(Token.TokenType.LABEL)
+                .map(value -> new LabelNode(value.getValue(), statement()))
+                .orElse(null);
+    }
+
+
+    /**
+     * Parses an IF statement, handling the condition and the statement to be executed if the condition is true.
+     * @return IFNode representing the parsed IF statement.
+     */
+    private IFNode IF(){
+        Optional<Node> expression = expression();
+        if (expression.isEmpty())
+            throw new RuntimeException("Expected Expression");
+
+        if (handler.matchAndRemove(Token.TokenType.THEN).isEmpty())
+            throw new RuntimeException("Expected THEN");
+        Optional<Token> word = handler.matchAndRemove(Token.TokenType.WORD);
+        if (word.isEmpty())
+            throw new RuntimeException("Expected Label");
+
+        return new IFNode(expression, word.get().getValue());
+    }
+
+
+
+    private ForNode For(){
+        AssignmentNode assignment = assignment();
+        if (assignment == null)
+            throw new RuntimeException("Expected Expression");
+
+        if (handler.matchAndRemove(Token.TokenType.TO).isEmpty())
+            throw new RuntimeException("Expected TO");
+
+        Optional<Node> interger = intOrFloat();
+        if(interger.get() instanceof IntergerNode)
+            return new ForNode(assignment, (IntergerNode) interger.get());
+        else
+            throw new RuntimeException("Expected Interger");
+
+        if (handler.matchAndRemove(Token.TokenType.STEP).isEmpty()) {
+            return new ForNode(assignment, (IntergerNode) interger.get());
+        }
+        Optional<Node> interger2 = intOrFloat();
+        if(interger.get() instanceof IntergerNode)
+            return new ForNode(assignment, (IntergerNode) interger.get());
+        else
+            throw new RuntimeException("Expected Interger");
+    }
+
+
+
+
+
+
+
+
 
     /**
      * Parses an input statement, handling the list of input variables.
@@ -175,20 +259,68 @@ public class Parser {
     }
 
     /**
+     * Parses boolean expressions, handling comparison operations such as equals and less than.
+     * @return Opt containing the Node representing the boolean expression, if parsed successfully.
+     */
+    private MathOpNode.BooleanOp booleanExpression(){
+        if (handler.matchAndRemove(Token.TokenType.EQUALS).isPresent()){
+            return MathOpNode.BooleanOp.EQUALS;
+        }
+        if (handler.matchAndRemove(Token.TokenType.GREATER_THAN).isPresent()){
+            return MathOpNode.BooleanOp.GREATER_THAN;
+        }
+        if (handler.matchAndRemove(Token.TokenType.LESS_THAN).isPresent()){
+            return MathOpNode.BooleanOp.LESS_THAN;
+        }
+        if (handler.matchAndRemove(Token.TokenType.GREATER_THAN_OR_EQUAL).isPresent()){
+            return MathOpNode.BooleanOp.GREATER_THAN_OR_EQUAL;
+        }
+        if (handler.matchAndRemove(Token.TokenType.LESS_THAN_OR_EQUAL).isPresent()){
+            return MathOpNode.BooleanOp.LESS_THAN_OR_EQUAL;
+        }
+        if (handler.matchAndRemove(Token.TokenType.NOT_EQUAL).isPresent()){
+            return MathOpNode.BooleanOp.NOT_EQUALS;
+        }
+        return null;
+
+    }
+
+
+    /**
      * Parses expressions, handling binary operations such as addition and subtraction.
      * It builds upon the lower-level term() method to construct the expression hierarchy.
      * @return Optional containing the Node representing the expression, if parsed successfully.
      */
     public Optional<Node> expression() {
         Optional<Node> left = term();
-        while (handler.matchAndRemove(Token.TokenType.PLUS).isPresent()){
-            left = Optional.of(new MathOpNode(left.get(), MathOpNode.MathOp.ADD, term().get()));
+        boolean halt = false;
+        while (!halt){
+            if (handler.matchAndRemove(Token.TokenType.PLUS).isPresent()){
+                left = Optional.of(new MathOpNode(left.get(), MathOpNode.MathOp.ADD, term().get()));
+            }
+            else if (handler.matchAndRemove(Token.TokenType.MINUS).isPresent()){
+                left = Optional.of(new MathOpNode(left.get(), MathOpNode.MathOp.SUBTRACT, term().get()));
+            }
+            else
+                halt = true;
         }
-        while (handler.matchAndRemove(Token.TokenType.MINUS).isPresent()){
-            left = Optional.of(new MathOpNode(left.get(), MathOpNode.MathOp.SUBTRACT, term().get()));
+
+        MathOpNode.BooleanOp boolOp = booleanExpression();
+        if (boolOp != null){
+            Optional<Node> right = expression();
+            if (right.isPresent()){
+                return Optional.of(new MathOpNode(left.get(), boolOp, right.get()));
+            }
         }
+
         return left;
     }
+
+
+
+
+
+
 
     /**
      * Parses terms within expressions, handling multiplication and division.
@@ -197,11 +329,16 @@ public class Parser {
      */
     public Optional<Node> term(){
         Optional<Node> left = factor();
-        while (handler.matchAndRemove(Token.TokenType.MULTIPLY).isPresent()) {
-            left = Optional.of(new MathOpNode(left.get(), MathOpNode.MathOp.MULTIPLY, factor().get()));
-        }
-        while (handler.matchAndRemove(Token.TokenType.DIVIDE).isPresent()){
-            left = Optional.of(new MathOpNode(left.get(), MathOpNode.MathOp.DIVIDE, factor().get()));
+        boolean halt = false;
+        while (!halt){
+            if (handler.matchAndRemove(Token.TokenType.MULTIPLY).isPresent()){
+                left = Optional.of(new MathOpNode(left.get(), MathOpNode.MathOp.MULTIPLY, factor().get()));
+            }
+            else if (handler.matchAndRemove(Token.TokenType.DIVIDE).isPresent()){
+                left = Optional.of(new MathOpNode(left.get(), MathOpNode.MathOp.DIVIDE, factor().get()));
+            }
+            else
+                halt = true;
         }
         return left;
     }

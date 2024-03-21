@@ -14,12 +14,25 @@ public class MathOpNode extends Node{
         SUBTRACT,
         MULTIPLY,
         DIVIDE,
-
     }
+
+    public enum BooleanOp{
+        AND,
+        OR,
+        NOT,
+        EQUALS,
+        NOT_EQUALS,
+        GREATER_THAN,
+        LESS_THAN,
+        GREATER_THAN_OR_EQUAL,
+        LESS_THAN_OR_EQUAL
+    }
+
 
 
     private Node left;
     private MathOp op;
+    private BooleanOp boolOp;
     private Node right;
 
 
@@ -33,6 +46,19 @@ public class MathOpNode extends Node{
         this.op = op;
         this.right = right;
     }
+
+
+    /**
+     * @param left node
+     * @param boolOp node
+     * @param right node
+     */
+    public MathOpNode(Node left, BooleanOp boolOp, Node right){
+        this.left = left;
+        this.boolOp = boolOp;
+        this.right = right;
+    }
+
 
     /**
      * @param left node
@@ -76,11 +102,19 @@ public class MathOpNode extends Node{
                     ", right=" + right +
                     '}';
         }
+        else if(boolOp != null){
+            return "MathOpNode{" +
+                    "left=" + left +
+                    ", boolOp=" + boolOp +
+                    ", right=" + right +
+                    '}';
+        }
         return "MathOpNode{" +
-                "left=" + left +
-                ", right=" + right +
-                '}';
+                    "left=" + left +
+                    ", right=" + right +
+                    '}';
     }
+
 
 
 
