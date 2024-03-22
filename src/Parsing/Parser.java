@@ -69,10 +69,18 @@ public class Parser {
             return IF();
         }
         if (handler.matchAndRemove(Token.TokenType.FOR).isPresent()){
-            return new ForNode(handler.matchAndRemove(Token.TokenType.WORD)
-                    .map(Token::getValue)
-                    .orElse(null), expression().get(), expression().get());
+            return For();
         }
+        if (handler.matchAndRemove(Token.TokenType.While).isPresent()){
+            return While();
+        }
+        if (handler.matchAndRemove(Token.TokenType.NEXT).isPresent()){
+            return next();
+         }
+        if (handler.matchAndRemove(Token.TokenType.END).isPresent()){
+            return new End();
+        }
+
 
         LabelNode token1 = label();
         if (token1 != null) return token1;
@@ -101,6 +109,32 @@ public class Parser {
     }
 
 
+
+    private WhileNode While(){
+        BooleanExpressionNode expression = booleanExpression();
+        Optional<Token> token = handler.matchAndRemove(Token.TokenType.WORD);
+        if (token.isEmpty())
+            throw new RuntimeException("Expected Label");
+        StatementNode statement = statement();
+        if (statement == null)
+            throw new RuntimeException("Expected Statement");
+        return new WhileNode(expression, statement, token.get().getValue());
+    }
+
+
+    /**
+     * Parses a NEXT statement, handling the variable to be incremented.
+     * @return NextNode representing the parsed NEXT statement.
+     */
+    private Next next(){
+        Optional<Node> factor = factor();
+        if (factor.isEmpty())
+            throw new RuntimeException("Expected Factor");
+        if (factor.get() instanceof VariableNode) return new Next((VariableNode) factor.get());
+        throw new RuntimeException("Expected Variable");
+    }
+
+
     /**
      * Parses a label statement, handling the label identifier and the statement to be executed.
      * @return LabelNode representing the parsed label statement.
@@ -117,16 +151,12 @@ public class Parser {
      * @return IFNode representing the parsed IF statement.
      */
     private IFNode IF(){
-        Optional<Node> expression = expression();
-        if (expression.isEmpty())
-            throw new RuntimeException("Expected Expression");
-
+        BooleanExpressionNode expression = booleanExpression();
         if (handler.matchAndRemove(Token.TokenType.THEN).isEmpty())
             throw new RuntimeException("Expected THEN");
         Optional<Token> word = handler.matchAndRemove(Token.TokenType.WORD);
         if (word.isEmpty())
             throw new RuntimeException("Expected Label");
-
         return new IFNode(expression, word.get().getValue());
     }
 
@@ -136,28 +166,33 @@ public class Parser {
         AssignmentNode assignment = assignment();
         if (assignment == null)
             throw new RuntimeException("Expected Expression");
-
         if (handler.matchAndRemove(Token.TokenType.TO).isEmpty())
             throw new RuntimeException("Expected TO");
 
-        Optional<Node> interger = intOrFloat();
-        if(interger.get() instanceof IntergerNode)
-            return new ForNode(assignment, (IntergerNode) interger.get());
-        else
-            throw new RuntimeException("Expected Interger");
+        IntergerNode end = isIntergerNode();
+        if (end == null)
+            throw new RuntimeException("Expected Integer");
 
-        if (handler.matchAndRemove(Token.TokenType.STEP).isEmpty()) {
-            return new ForNode(assignment, (IntergerNode) interger.get());
-        }
-        Optional<Node> interger2 = intOrFloat();
-        if(interger.get() instanceof IntergerNode)
-            return new ForNode(assignment, (IntergerNode) interger.get());
-        else
-            throw new RuntimeException("Expected Interger");
+        if (handler.matchAndRemove(Token.TokenType.STEP).isEmpty())
+            return new ForNode(assignment, end);
+
+       IntergerNode step = isIntergerNode();
+        if (step == null)
+            throw new RuntimeException("Expected Integer");
+
+        return new ForNode(assignment, end, step);
+
     }
 
 
 
+    private IntergerNode isIntergerNode(){
+        Optional<Node> interger =  intOrFloat();
+        if (interger.get() instanceof IntergerNode)
+            return (IntergerNode) interger.get();
+        else
+            return null;
+    }
 
 
 
@@ -262,28 +297,44 @@ public class Parser {
      * Parses boolean expressions, handling comparison operations such as equals and less than.
      * @return Opt containing the Node representing the boolean expression, if parsed successfully.
      */
-    private MathOpNode.BooleanOp booleanExpression(){
+    private BooleanExpressionNode.BooleanOp booleanType(){
         if (handler.matchAndRemove(Token.TokenType.EQUALS).isPresent()){
-            return MathOpNode.BooleanOp.EQUALS;
+            return BooleanExpressionNode.BooleanOp.EQUALS;
         }
         if (handler.matchAndRemove(Token.TokenType.GREATER_THAN).isPresent()){
-            return MathOpNode.BooleanOp.GREATER_THAN;
+            return BooleanExpressionNode.BooleanOp.GREATER_THAN;
         }
         if (handler.matchAndRemove(Token.TokenType.LESS_THAN).isPresent()){
-            return MathOpNode.BooleanOp.LESS_THAN;
+            return BooleanExpressionNode.BooleanOp.LESS_THAN;
         }
         if (handler.matchAndRemove(Token.TokenType.GREATER_THAN_OR_EQUAL).isPresent()){
-            return MathOpNode.BooleanOp.GREATER_THAN_OR_EQUAL;
+            return BooleanExpressionNode.BooleanOp.GREATER_THAN_OR_EQUAL;
         }
         if (handler.matchAndRemove(Token.TokenType.LESS_THAN_OR_EQUAL).isPresent()){
-            return MathOpNode.BooleanOp.LESS_THAN_OR_EQUAL;
+            return BooleanExpressionNode.BooleanOp.LESS_THAN_OR_EQUAL;
         }
         if (handler.matchAndRemove(Token.TokenType.NOT_EQUAL).isPresent()){
-            return MathOpNode.BooleanOp.NOT_EQUALS;
+            return BooleanExpressionNode.BooleanOp.NOT_EQUALS;
         }
         return null;
 
     }
+
+    /**
+     * Parses boolean expressions, handling comparison operations such as equals and less than.
+     * @return Opt containing the Node representing the boolean expression, if parsed successfully.
+     */
+    private BooleanExpressionNode booleanExpression(){
+        Optional<Node> left = expression();
+        BooleanExpressionNode.BooleanOp boolOp = booleanType();
+        Optional<Node> right = expression();
+        if (left.isEmpty()) throw new RuntimeException("Expected Expression");
+        if (right.isEmpty()) throw new RuntimeException("Expected Expression");
+        if (boolOp == null) throw new RuntimeException("Expected Boolean Operator");
+        return new BooleanExpressionNode(left.get(), boolOp, right.get());
+    }
+
+
 
 
     /**
@@ -303,14 +354,6 @@ public class Parser {
             }
             else
                 halt = true;
-        }
-
-        MathOpNode.BooleanOp boolOp = booleanExpression();
-        if (boolOp != null){
-            Optional<Node> right = expression();
-            if (right.isPresent()){
-                return Optional.of(new MathOpNode(left.get(), boolOp, right.get()));
-            }
         }
 
         return left;

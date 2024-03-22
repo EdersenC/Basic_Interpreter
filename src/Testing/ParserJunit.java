@@ -289,11 +289,12 @@ public class ParserJunit {
         //MathOpNode mathOpNode = (MathOpNode) programNode.getNodes().get(0);
 
         assertEquals("ProgramNode{nodes=[Optional[StatementsNode{statements=[" +
-                        "IF{condition='Optional[MathOpNode{left=VariableNode{name=pizza, value=null}, boolOp=LESS_THAN, " +
-                        "right=MathOpNode{left=MathOpNode{left=MathOpNode{left=IntegerNode{value=2}, " +
-                        "op=ADD, right=IntegerNode{value=99}}, op=SUBTRACT, right=IntegerNode{value=33}}, " +
-                        "op=ADD, right=MathOpNode{left=IntegerNode{value=3}, " +
-                        "op=MULTIPLY, right=FloatNode{value=5.3}}}}]', thenStatement=water}]}]]}"
+                        "IF{condition='BooleanExpressionNode{left=VariableNode{name=pizza," +
+                        " value=null}, boolOp=LESS_THAN, " +
+                        "right=MathOpNode{left=MathOpNode{left=MathOpNode{left=IntegerNode{value=2}," +
+                        " op=ADD, right=IntegerNode{value=99}}, op=SUBTRACT, right=IntegerNode{value=33}}, " +
+                        "op=ADD, right=MathOpNode{left=IntegerNode{value=3}," +
+                        " op=MULTIPLY, right=FloatNode{value=5.3}}}}', thenStatement=water}]}]]}"
                 ,programNode.toString());
     }
 
@@ -341,6 +342,73 @@ public class ParserJunit {
 
 
 
+    @Test
+    public void TestFor() {
+        String content = "for i = 1 to 10 \n print i \n next i ";
+        String srcDirectoryPath = "src/BasicArea";
+        String basicFileName = "basic.basic";
+        Path basicFilePath = Paths.get(srcDirectoryPath, basicFileName);
+        LinkedList<Token> tokens = runLex(null, content);
+        Parser parser = new Parser(tokens);
+        ProgramNode programNode = parser.parse();
+        System.out.println(programNode.toString());
+
+        assertEquals("ProgramNode{nodes=[Optional[StatementsNode{statements=[" +
+                        "For{variable='AssignmentNode{variable=VariableNode{name=i, value=null}, " +
+                        "value=IntegerNode{value=1}}', end='IntegerNode{value=10}', " +
+                        "step='IntegerNode{value=1}'}, " +
+                        "PrintNode{nodes=[VariableNode{name=i, value=null}]}, " +
+                        "Next{variable='VariableNode{name=i, value=null}'}]}]]}"
+                ,programNode.toString());
+
+        content = "for i = 1 to 10 step 5 \n print i \n next i ";
+        tokens = runLex(null, content);
+        parser = new Parser(tokens);
+        programNode = parser.parse();
+        System.out.println(programNode.toString());
+        assertEquals("ProgramNode{nodes=[Optional[StatementsNode{statements=[" +
+                        "For{variable='AssignmentNode{variable=VariableNode{name=i, value=null}, value=IntegerNode{value=1}}', " +
+                        "end='IntegerNode{value=10}', step='IntegerNode{value=5}'}, " +
+                        "PrintNode{nodes=[VariableNode{name=i, value=null}]}, " +
+                        "Next{variable='VariableNode{name=i, value=null}'}]}]]}"
+                ,programNode.toString());
+
+    }
+
+
+    @Test
+    public void TestEnd() {
+        String content = "print 1,3,4,5,6,3,5.6 \n end";
+        LinkedList<Token> tokens = runLex(null, content);
+        Parser parser = new Parser(tokens);
+        ProgramNode programNode = parser.parse();
+        System.out.println(programNode.toString());
+
+        assertEquals("ProgramNode{nodes=[Optional[StatementsNode{statements=[" +
+                        "PrintNode{nodes=[IntegerNode{value=1}, IntegerNode{value=3}, " +
+                        "IntegerNode{value=4}, IntegerNode{value=5}, IntegerNode{value=6}, " +
+                        "IntegerNode{value=3}, FloatNode{value=5.6}]}, " +
+                        "End{}]}]]}"
+                ,programNode.toString());
+
+    }
+
+
+    @Test
+    public void TestWhile() {
+        String content = "while i < 10 killWater \n print i \n next i";
+        LinkedList<Token> tokens = runLex(null, content);
+        Parser parser = new Parser(tokens);
+        ProgramNode programNode = parser.parse();
+        System.out.println(programNode.toString());
+
+        assertEquals("ProgramNode{nodes=[Optional[StatementsNode{statements=[" +
+                        "While{condition='Optional[MathOpNode{left=VariableNode{name=i, value=null}, " +
+                        "boolOp=LESS_THAN, right=IntegerNode{value=10}}]', " +
+                        "statements=[PrintNode{nodes=[VariableNode{name=i, value=null}]}]}]}]]}"
+                ,programNode.toString());
+
+    }
 
 
 

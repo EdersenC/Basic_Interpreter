@@ -1,17 +1,17 @@
 package Parsing.Nodes;
 
-public class While extends StatementNode{
+public class WhileNode extends StatementNode{
 
 
 
 
-    private final StatementNode condition;
+    private final BooleanExpressionNode condition;
     private final StatementNode statement;
 
     private final String label;
 
 
-    public While(StatementNode condition, StatementNode statement, String label){
+    public WhileNode(BooleanExpressionNode condition, StatementNode statement, String label){
         this.condition = condition;
         this.statement = statement;
         this.label = label;
