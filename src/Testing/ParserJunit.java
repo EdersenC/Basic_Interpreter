@@ -353,12 +353,14 @@ public class ParserJunit {
         ProgramNode programNode = parser.parse();
         System.out.println(programNode.toString());
 
-        assertEquals("ProgramNode{nodes=[Optional[StatementsNode{statements=[" +
-                        "For{variable='AssignmentNode{variable=VariableNode{name=i, value=null}, " +
+        assertEquals("ProgramNode{nodes=[Optional[StatementsNode{" +
+                        "statements=[For{variable='" +
+                        "AssignmentNode{variable=VariableNode{name=i, value=null}, " +
                         "value=IntegerNode{value=1}}', end='IntegerNode{value=10}', " +
-                        "step='IntegerNode{value=1}'}, " +
-                        "PrintNode{nodes=[VariableNode{name=i, value=null}]}, " +
-                        "Next{variable='VariableNode{name=i, value=null}'}]}]]}"
+                        "statements='StatementsNode{statements=[null, " +
+                        "PrintNode{nodes=[VariableNode{name=i, value=null}]}]}', " +
+                        "step='IntegerNode{value=1}', " +
+                        "next='Next{variable='VariableNode{name=i, value=null}'}'}]}]]}"
                 ,programNode.toString());
 
         content = "for i = 1 to 10 step 5 \n print i \n next i ";
@@ -367,10 +369,12 @@ public class ParserJunit {
         programNode = parser.parse();
         System.out.println(programNode.toString());
         assertEquals("ProgramNode{nodes=[Optional[StatementsNode{statements=[" +
-                        "For{variable='AssignmentNode{variable=VariableNode{name=i, value=null}, value=IntegerNode{value=1}}', " +
-                        "end='IntegerNode{value=10}', step='IntegerNode{value=5}'}, " +
-                        "PrintNode{nodes=[VariableNode{name=i, value=null}]}, " +
-                        "Next{variable='VariableNode{name=i, value=null}'}]}]]}"
+                        "For{variable='AssignmentNode{variable=VariableNode{name=i, value=null}, " +
+                        "value=IntegerNode{value=1}}', end='IntegerNode{value=10}', " +
+                        "statements='StatementsNode{" +
+                        "statements=[null, PrintNode{nodes=[VariableNode{name=i, value=null}]}]}', " +
+                        "step='IntegerNode{value=5}', " +
+                        "next='Next{variable='VariableNode{name=i, value=null}'}'}]}]]}"
                 ,programNode.toString());
 
     }
@@ -396,19 +400,64 @@ public class ParserJunit {
 
     @Test
     public void TestWhile() {
-        String content = "while i < 10 killWater \n print i \n next i";
+        String content = "while i < 10 killWater \n print i";
         LinkedList<Token> tokens = runLex(null, content);
         Parser parser = new Parser(tokens);
         ProgramNode programNode = parser.parse();
         System.out.println(programNode.toString());
 
-        assertEquals("ProgramNode{nodes=[Optional[StatementsNode{statements=[" +
-                        "While{condition='Optional[MathOpNode{left=VariableNode{name=i, value=null}, " +
-                        "boolOp=LESS_THAN, right=IntegerNode{value=10}}]', " +
-                        "statements=[PrintNode{nodes=[VariableNode{name=i, value=null}]}]}]}]]}"
+        assertEquals("ProgramNode{nodes=[Optional[StatementsNode{" +
+                        "statements=[" +
+                        "While{condition=" +
+                        "BooleanExpressionNode{left=VariableNode{name=i, value=null}, " +
+                        "boolOp=LESS_THAN, right=IntegerNode{value=10}}, " +
+                        "statements=StatementsNode{statements=[" +
+                        "PrintNode{nodes=[VariableNode{name=i, value=null}]}]}," +
+                        " label='killWater'}]}]]}"
                 ,programNode.toString());
 
     }
+
+
+    @Test
+    public void TestFunction() {
+        String content = "function = Random() ";
+        LinkedList<Token> tokens = runLex(null, content);
+        Parser parser = new Parser(tokens);
+        ProgramNode programNode = parser.parse();
+        System.out.println(programNode.toString());
+
+        assertEquals("ProgramNode{nodes=[Optional[" +
+                        "StatementsNode{statements=[" +
+                        "AssignmentNode{variable=VariableNode{name=function, value=null}, " +
+                        "value=Function{name='Random', parameters=[]}}]}]]}"
+                ,programNode.toString());
+
+
+
+
+        content = "for i = 1 to 10 step 5 \n Bob = NUM(i) \n print 1+2,1+3,bob \n next i ";
+        tokens = runLex(null, content);
+        parser = new Parser(tokens);
+        programNode = parser.parse();
+        System.out.println(programNode.toString());
+        assertEquals("ProgramNode{nodes=[Optional[StatementsNode{statements=" +
+                        "[For{variable='AssignmentNode{variable=VariableNode{name=i, value=null}, " +
+                        "value=IntegerNode{value=1}}', end='IntegerNode{value=10}', " +
+                        "statements='StatementsNode{statements=[null, " +
+                        "AssignmentNode{variable=VariableNode{name=Bob, value=null}, value=Function{name='NUM', " +
+                        "parameters=[VariableNode{name=i, value=null}]}}, " +
+                        "PrintNode{nodes=[MathOpNode{left=IntegerNode{value=1}, op=ADD, right=IntegerNode{value=2}}, " +
+                        "MathOpNode{left=IntegerNode{value=1}, op=ADD, right=IntegerNode{value=3}}, " +
+                        "VariableNode{name=bob, value=null}]}]}', step='IntegerNode{value=5}'," +
+                        " next='Next{variable='VariableNode{name=i, value=null}'}'}]}]]}"
+                ,programNode.toString());
+
+
+
+    }
+
+
 
 
 

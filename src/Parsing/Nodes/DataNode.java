@@ -15,6 +15,22 @@ public class DataNode extends StatementNode {
             nodes.add(node);
     }
 
+
+    /**
+     * @param nodes the nodes to be added
+     */
+    public void setNodes(LinkedList<Node> nodes){
+        this.nodes.addAll(nodes);
+    }
+
+
+
+    /**
+     * @return the nodes
+     */
+    public LinkedList<Node> getNodes(){
+        return new LinkedList<>(this.nodes);
+    }
     /**
      * @return the node as a string
      */

@@ -16,6 +16,12 @@ public class ReadNode extends StatementNode {
         variables.add(variable);
     }
 
+    /**
+     * @return the list of variables
+     */
+    public LinkedList<VariableNode> getVariables(){
+        return new LinkedList<>(this.variables);
+    }
 
     /**
      * @return the node as a string

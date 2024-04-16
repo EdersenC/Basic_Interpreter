@@ -13,6 +13,9 @@ import java.util.Optional;
 public class Parser {
 
     private TokenManager handler;
+    private DataNode data;
+
+    private LinkedList<LabelNode> labels = new LinkedList<>();
 
     /**
      * Constructs a Parser with a given list of tokens.
@@ -28,12 +31,13 @@ public class Parser {
      * @return ProgramNode representing the root of the AST.
      */
     public ProgramNode parse(){
-        LinkedList<Optional<Node>> nodes = new LinkedList<>();
+        LinkedList<StatementsNode> nodes = new LinkedList<>();
+        StatementsNode statements = null;
         while (handler.moreTokens()){
-            nodes.add(Optional.of(statements()));
+            nodes.add(statements());
             handler.acceptSeparator(); // skips EndLine Tokens
         }
-        return new ProgramNode(nodes);
+        return new ProgramNode(nodes, data, labels);
     }
 
     /**
@@ -74,16 +78,13 @@ public class Parser {
         if (handler.matchAndRemove(Token.TokenType.While).isPresent()){
             return While();
         }
-        if (handler.matchAndRemove(Token.TokenType.NEXT).isPresent()){
-            return next();
-         }
         if (handler.matchAndRemove(Token.TokenType.END).isPresent()){
             return new End();
         }
 
 
         LabelNode token1 = label();
-        if (token1 != null) return token1;
+        if (token1 != null) labels.add(token1);
         AssignmentNode assignment = assignment();
         if (assignment != null) return assignment;
 
@@ -100,7 +101,7 @@ public class Parser {
         if (handler.matchAndRemove(Token.TokenType.DATA).isPresent()){
             DataNode dataNode = new DataNode();
             handleCommas(dataNode);
-            return dataNode;
+            data = dataNode;
         }
         if (handler.matchAndRemove(Token.TokenType.INPUT).isPresent()){
             return inputList();
@@ -110,15 +111,20 @@ public class Parser {
 
 
 
+    /**
+     * Parses a WHILE statement, handling the condition and the statement to be executed while the condition is true.
+     * @return WhileNode representing the parsed WHILE statement.
+     */
     private WhileNode While(){
         BooleanExpressionNode expression = booleanExpression();
         Optional<Token> token = handler.matchAndRemove(Token.TokenType.WORD);
         if (token.isEmpty())
             throw new RuntimeException("Expected Label");
-        StatementNode statement = statement();
-        if (statement == null)
-            throw new RuntimeException("Expected Statement");
-        return new WhileNode(expression, statement, token.get().getValue());
+        handler.acceptSeparator();
+        StatementsNode statements = statements();
+        if (statements == null)
+            throw new RuntimeException("Expected Statements");
+        return new WhileNode(expression, statements, token.get().getValue());
     }
 
 
@@ -164,6 +170,7 @@ public class Parser {
 
     private ForNode For(){
         AssignmentNode assignment = assignment();
+        boolean hasStep = false;
         if (assignment == null)
             throw new RuntimeException("Expected Expression");
         if (handler.matchAndRemove(Token.TokenType.TO).isEmpty())
@@ -173,19 +180,36 @@ public class Parser {
         if (end == null)
             throw new RuntimeException("Expected Integer");
 
-        if (handler.matchAndRemove(Token.TokenType.STEP).isEmpty())
-            return new ForNode(assignment, end);
-
-       IntergerNode step = isIntergerNode();
-        if (step == null)
-            throw new RuntimeException("Expected Integer");
-
-        return new ForNode(assignment, end, step);
+        if (handler.matchAndRemove(Token.TokenType.STEP).isPresent()){
+            hasStep = true;
+        }
+        StatementsNode statements = new StatementsNode();
+        if (hasStep) {
+            IntergerNode step = isIntergerNode();
+            if (step == null)
+                throw new RuntimeException("Expected Integer");
+            while (handler.matchAndRemove(Token.TokenType.NEXT).isEmpty()){
+                statements.addStatement(statement());
+                handler.acceptSeparator();
+            }
+            return new ForNode(assignment, end, step,statements, next());
+        }
+        else {
+            while (handler.matchAndRemove(Token.TokenType.NEXT).isEmpty()){
+               statements.addStatement(statement());
+               handler.acceptSeparator();
+            }
+            return new ForNode(assignment, end,statements, next());
+        }
 
     }
 
 
 
+    /**
+     * Parses a number, handling both integer and float values.
+     * @return Node representing the parsed number.
+     */
     private IntergerNode isIntergerNode(){
         Optional<Node> interger =  intOrFloat();
         if (interger.get() instanceof IntergerNode)
@@ -229,12 +253,12 @@ public class Parser {
     private void handleCommas(Node node){
         do {
             if (node instanceof PrintNode){
+                expression().ifPresent(((PrintNode) node)::addNode);
                 ((PrintNode) node).addNode(variable());
                 ((PrintNode) node).addNode(constant());
-                expression().ifPresent(((PrintNode) node)::addNode);
             }
             if (node instanceof ReadNode){
-                    ((ReadNode) node).addVariable(variable());
+                    ((ReadNode) node).addVariable(endsWithVariable());
             }
             if (node instanceof InputNode){
                 ((InputNode) node).addVariable(variable());
@@ -247,13 +271,50 @@ public class Parser {
             if (node instanceof InputNode){
                 ((InputNode) node).addVariable(variable());
             }
+            if (node instanceof FunctionNode){
+                ((FunctionNode) node).addParameters(variable());
+            }
         }while (handler.matchAndRemove(Token.TokenType.COMMA).isPresent());
-        if (handler.matchAndRemove(Token.TokenType.ENDOFLINE).isEmpty()){
+        if (handler.matchAndRemove(Token.TokenType.ENDOFLINE).isEmpty()&& !(node instanceof FunctionNode)){
             throw new RuntimeException("Invalid Syntax");
         }
 
     }
 
+
+    /**
+     * Parses a function, handling the function name, parameters, and the statements to be executed.
+     * @return FunctionNode representing the parsed function.
+     */
+    private FunctionNode function(){
+        Optional<Token> function = handler.matchAndRemove(Token.TokenType.Function);
+        if (function.isEmpty())
+            return null;
+        if (handler.matchAndRemove(Token.TokenType.LEFT_PAREN).isEmpty())
+            throw new RuntimeException("Expected Right Parenthesis");
+        FunctionNode functionNode = new FunctionNode(function.get().getValue());
+        handler.acceptSeparator();
+        handleCommas(functionNode);
+        if (handler.matchAndRemove(Token.TokenType.RIGHT_PAREN).isEmpty())
+            throw new RuntimeException("Expected Left Parenthesis");
+        return functionNode;
+    }
+
+
+
+
+    private VariableNode endsWithVariable(){
+        Optional<Token> token = handler.matchAndRemove(Token.TokenType.WORD);
+        if (token.isEmpty())
+            return null;
+        if (token.get().getValue().endsWith("$")){
+            return new VariableNode(token.get().getValue(),new StringNode(""));
+        }
+        if (token.get().getValue().endsWith("%")){
+            return new VariableNode(token.get().getValue(),new FloatNode(0));
+        }
+        return new VariableNode(token.get().getValue(),new IntergerNode(0));
+    }
 
     /**
      * Parses a variable.
@@ -344,6 +405,7 @@ public class Parser {
      */
     public Optional<Node> expression() {
         Optional<Node> left = term();
+        FunctionNode func;
         boolean halt = false;
         while (!halt){
             if (handler.matchAndRemove(Token.TokenType.PLUS).isPresent()){
@@ -351,8 +413,9 @@ public class Parser {
             }
             else if (handler.matchAndRemove(Token.TokenType.MINUS).isPresent()){
                 left = Optional.of(new MathOpNode(left.get(), MathOpNode.MathOp.SUBTRACT, term().get()));
-            }
-            else
+            } else if ((func = function())!=null){
+                   left = Optional.of(func);
+            } else
                 halt = true;
         }
 

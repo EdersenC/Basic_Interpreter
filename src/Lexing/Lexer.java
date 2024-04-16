@@ -212,13 +212,36 @@ public class Lexer {
 
         charPos = charPos + pos;
         if (!end) {
-            if (tokenMap.containsKey(word.toString())) {
+            if (tokenMap.containsKey(word.toString())&& !word.toString().contentEquals("function")) {
                 token.add(new Token(tokenMap.get(word.toString()), word.toString(), lineNumber, charPos));
-            }
-            else
+            } else if (isfunction()) {
+                token.add(new Token(Token.TokenType.Function, word.toString(), lineNumber, charPos));
+
+            } else
                 token.add(new Token(Token.TokenType.WORD, word.toString(), lineNumber, charPos));
         }
     }
+
+
+
+
+    /**
+     * This method is used to check if the token is a function
+     * @return boolean
+     */
+    public boolean isfunction(){
+        if (handler.peek(0)=='(') {
+            int pos = 0;
+            while (handler.peek(pos) != ')') {
+                pos++;
+            }
+            return handler.peek(pos) == ')';
+        }
+        return false;
+    }
+
+
+
 
     /**
      * This method is used to process a number token
@@ -294,7 +317,8 @@ public class Lexer {
                 return true;
             }
         }
-        throw new NoSuchElementException("Invalid symbol at line %d".formatted(lineNumber));
+        //throw new NoSuchElementException("Invalid symbol at line %d".formatted(lineNumber));
+        return false;
     }
 
 
@@ -304,6 +328,15 @@ public class Lexer {
     public void processSymbol(){
         int pos = 0;
         StringBuilder symbol = new StringBuilder();
+
+        if (handler.peek(0) == '(' ){
+            token.add(new Token(Token.TokenType.LEFT_PAREN, "(", lineNumber, charPos));
+            handler.swallow(1);
+        } else if (handler.peek(0)==')') {
+            token.add(new Token(Token.TokenType.RIGHT_PAREN, ")", lineNumber, charPos));
+            handler.swallow(1);
+        }
+
         while (handler.peek(0) != ' '
                 && handler.peek(0) != '"'
                 && handler.peek(0) != '\r'
@@ -317,6 +350,9 @@ public class Lexer {
             pos++;
 
         }
+
+
+
         charPos = charPos + pos;
 
 //        if (!oneCharacter.containsKey(symbol.toString()) && !twoCharacter.containsKey(symbol.toString())){

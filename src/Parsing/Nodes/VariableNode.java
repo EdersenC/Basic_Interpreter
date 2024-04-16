@@ -25,11 +25,12 @@ public class VariableNode extends StatementNode{
      * @return the name of the variable
      */
     public String getName(){
-        return name;
+        return this.name;
     }
     /**
      * @return the value of the variable
      */
+
     public Node getValue(){
         return value;
     }

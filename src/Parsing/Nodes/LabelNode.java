@@ -12,6 +12,13 @@ public class LabelNode extends StatementNode {
         this.statement = statement;
     }
 
+    /**
+     * @return the labels name
+     */
+    public String getName() {
+        return label;
+    }
+
      public String toString() {
          return "LabelNode{" +
                  "label='" + label + '\'' +
